@@ -27,6 +27,8 @@ from hashlib import sha256
 from tempfile import TemporaryDirectory
 from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
+UPSTREAM_RULES_RUST = "https://github.com/just-buildsystem/rules-rust"
+
 JSON = Union[str, int, float, bool, None, Dict[str, 'JSON'], List['JSON']]
 
 # ------- JSON formating ------------
@@ -668,13 +670,17 @@ def main():
         global IMPORTED_REPOS
         IMPORTED_REPOS.add("rust-rules-root")
     else:
-        print(
-            "Warning: adding local path to this checkout to the repository configuration",
-            file=sys.stderr)
+        # Use git to find out the head commit of the upstream rules-rust
+        head_commit=subprocess.run(
+            ["git", "ls-remote", UPSTREAM_RULES_RUST, "master"],
+            stdout=subprocess.PIPE).stdout.decode('utf-8').split('\t')[0]
         repos_json["rust-rules-root"] = {
             "repository":
-            {"type": "file",
-             "path": os.path.normpath(os.path.join(my_directory, "../rules")),
+            {"type": "git",
+             "repository": UPSTREAM_RULES_RUST,
+             "branch": "master",
+             "commit": head_commit,
+             "subdir": "rules"
              }
         }
 

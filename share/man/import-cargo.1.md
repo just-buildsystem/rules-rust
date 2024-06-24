@@ -33,12 +33,10 @@ Output a usage message and exit.
 
 **`--rules`** *`name`*  
 Assume the rust rules are the logical repository *`name`* in the
-configuration provided on standard input. Typically, the rust rules
-would be imported first via **`just-import-git`**(1). If this option
-is not given, as last resort, a *`"file"`* repository for the rules
-is created pointing to the directory `../rules` relative to location
-of this binary. This is correct, if **`just-import-cargo`** is called
-from a (persistent) checkout of `rules-rust`, but hardly ever useful.
+configuration provided on standard input. Typically, the rust rules would
+be imported first via **`just-import-git`**(1). If this option is not
+given, the latest commit of `https://github.com/just-buildsystem/rules-rust`
+is taken.
 
 **`--repo-root`** *`root`*  
 Specify the root of the physical directory the configuration read from
