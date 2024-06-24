@@ -1,5 +1,5 @@
 { "foo":
-  { "type": ["rules/rust", "library"]
+  { "type": ["@", "rules-rust", "rust", "library"]
   , "name": ["foo"]
   , "crate_root": ["foo.rs"]
   , "c_hdrs": ["foo.h"]
@@ -7,7 +7,7 @@
   , "deps": ["bar"]
   }
 , "bar":
-  { "type": ["rules/rust", "library"]
+  { "type": ["@", "rules-rust", "rust", "library"]
   , "name": ["bar"]
   , "crate_root": ["bar.rs"]
   , "stage": ["bar"]

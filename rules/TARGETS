@@ -1,1 +1,3 @@
-{}
+{ "tree":
+  {"type": "install", "deps": [["TREE", null, "."]], "tainted": ["test"]}
+}

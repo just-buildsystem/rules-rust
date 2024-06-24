@@ -1,14 +1,20 @@
-{ "main": "rust-rules"
+{ "main": "rules-rust"
 , "repositories":
-  { "rust-rules":
-    { "repository": {"type": "file", "path": "."}
-    , "bindings": {"test-rules": "rules-test", "rules-cc": "rules-cc"}
+  { "rules-rust": {"repository": {"type": "file", "path": "rules"}}
+  , "testing":
+    { "repository": {"type": "file", "path": "test"}
+    , "bindings":
+      { "rules-rust": "rules-rust"
+      , "test-rules": "rules-test"
+      , "rules-cc": "rules-cc"
+      }
     }
   , "imports": {"repository": {"type": "file", "path": "etc/imports"}}
   , "test-rules":
-    { "repository": "rust-rules"
+    { "repository": "testing"
     , "target_root": "imports"
     , "target_file_name": "rules.TARGETS"
+    , "bindings": {"rules-rust": "rules-rust"}
     }
   }
 }

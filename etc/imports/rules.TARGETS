@@ -1,6 +1,6 @@
 { "tree":
   { "type": "install"
-  , "dirs": [[["TREE", null, "rules"], "rules"]]
+  , "dirs": [[["@", "rules-rust", "", "tree"], "rules"]]
   , "tainted": ["test"]
   }
 }

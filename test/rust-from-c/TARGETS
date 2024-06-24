@@ -6,7 +6,7 @@
   , "private-deps": [["./", "foo", "foo"]]
   }
 , "test_foo":
-  { "type": ["rules/rust", "test"]
+  { "type": ["@", "rules-rust", "rust", "test"]
   , "name": ["test_foo"]
   , "crate_root": ["foo/foo_test.rs"]
   , "stage": ["test_foo"]

@@ -1,5 +1,5 @@
 { "main":
-  { "type": ["rules/rust", "binary"]
+  { "type": ["@", "rules-rust", "rust", "binary"]
   , "name": ["main"]
   , "crate_root": ["main.rs"]
   , "deps": [["./", "clib", "foo"]]
