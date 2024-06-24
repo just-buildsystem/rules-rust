@@ -1,0 +1,23 @@
+{ "main":
+  { "type": ["@", "rules-cc", "CC", "binary"]
+  , "pure C": ["true"]
+  , "name": ["main"]
+  , "srcs": ["main.c"]
+  , "private-deps": [["./", "foo", "foo"]]
+  }
+, "test_foo":
+  { "type": ["rules/rust", "test"]
+  , "name": ["test_foo"]
+  , "crate_root": ["foo/foo_test.rs"]
+  , "stage": ["test_foo"]
+  , "deps": [["./", "foo", "foo"]]
+  }
+, "check_ints":
+  { "type": ["@", "rules-cc", "shell/test", "script"]
+  , "name": ["check_ints"]
+  , "test": ["check_ints.sh"]
+  , "deps": ["main"]
+  }
+, "TESTS":
+  {"type": "install", "deps": ["check_ints", "test_foo"], "tainted": ["test"]}
+}

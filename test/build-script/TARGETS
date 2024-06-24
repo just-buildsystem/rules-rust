@@ -1,0 +1,61 @@
+{ "baz-lib":
+  { "type": ["@", "rules", "rust", "library"]
+  , "name": ["baz"]
+  , "stage": ["baz"]
+  , "crate_root": ["baz.rs"]
+  , "edition": ["2021"]
+  , "version": ["1", "2", "3", "rc-1"]
+  }
+, "build_script":
+  { "type": ["@", "rules", "cargo", "build_script"]
+  , "name": ["build_script"]
+  , "crate_root": ["build.rs"]
+  , "edition": ["2018"]
+  , "stage": ["bar"]
+  , "deps": ["baz-lib"]
+  }
+, "bar-lib":
+  { "type": ["@", "rules", "rust", "library"]
+  , "name": ["bar"]
+  , "stage": ["bar"]
+  , "build_script": ["build_script"]
+  , "deps": ["baz-lib"]
+  , "crate_root": ["bar.rs"]
+  , "edition": ["2021"]
+  }
+, "bar-missing-baz":
+  { "type": ["@", "rules", "rust", "library"]
+  , "name": ["bar"]
+  , "stage": ["bar"]
+  , "crate_root": ["bar.rs"]
+  , "edition": ["2021"]
+  }
+, "foo-lib":
+  { "type": ["@", "rules", "rust", "library"]
+  , "name": ["foo"]
+  , "stage": ["foo"]
+  , "crate_root": ["foo.rs"]
+  , "edition": ["2021"]
+  , "deps": ["bar-lib"]
+  }
+, "main":
+  { "type": ["@", "rules", "rust", "binary"]
+  , "name": ["main"]
+  , "stage": ["bin"]
+  , "crate_root": ["main.rs"]
+  , "deps": ["foo-lib"]
+  }
+, "main-wrong-dep":
+  { "type": ["@", "rules", "rust", "binary"]
+  , "name": ["main"]
+  , "stage": ["bin"]
+  , "crate_root": ["main.rs"]
+  , "deps": ["bar-lib"]
+  }
+, "main-missing-dep":
+  { "type": ["@", "rules", "rust", "binary"]
+  , "name": ["main"]
+  , "stage": ["bin"]
+  , "crate_root": ["main.rs"]
+  }
+}

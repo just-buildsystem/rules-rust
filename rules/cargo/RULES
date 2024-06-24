@@ -1,0 +1,374 @@
+{ "build_script":
+  { "doc":
+    [ "The custom build script supported by cargo. This binary is"
+    , "executed before compiling the other crates. Currently, only its"
+    , "output is processed to augment the rustc flags. During a cross"
+    , "compilation, since the build script must be run on the host"
+    , "system, it is always compiled according to the configuration"
+    , "provided by the \"defaults\" for the \"HOST_ARCH\"."
+    ]
+  , "string_fields": ["name", "edition", "stage", "version", "pkg_name"]
+  , "target_fields": ["crate_root", "srcs", "deps", "cargo_features"]
+  , "field_doc":
+    { "name": ["The name of the crate being built."]
+    , "cargo_features":
+      ["List of cargo features this binary requires to be enabled."]
+    , "crate_root":
+      [ "The crate to be fed to the Rust compiler. It must evaluate to"
+      , "a single artifact/file."
+      ]
+    , "defaults": ["The Rust toolchain to use."]
+    , "deps": ["Any other libraries this binary depends upon."]
+    , "edition":
+      [ "The edition of the compiler to use during compilation. If"
+      , "unset, 2015 is used."
+      ]
+    , "pkg_name":
+      [ "The name of the package the crate belongs to. It is"
+      , "exported to the CARGO_PKG_NAME environment variable."
+      ]
+    , "srcs": ["The source files of the binary."]
+    , "stage":
+      [ "The logical location of the resulting artifact. Elements are"
+      , "joined with \"/\"."
+      ]
+    , "version":
+      [ "The crate version. Elements are joined with \".\" and the first"
+      , "three elements are used for the major, minor, and patch"
+      , "number respectively."
+      ]
+    }
+  , "config_vars": ["ARCH", "HOST_ARCH", "ENV"]
+  , "config_doc":
+    { "ARCH":
+      [ "Default value for both HOST_ARCH and TARGET_ARCH. It is user's"
+      , "responsibility to adapt the \"defaults\" according to the"
+      , "provided value."
+      ]
+    , "ENV":
+      [ "Additional environment variables (besides ones provided by"
+      , "the \"defaults\" target) to be set for each action. If the"
+      , "same variable is set here and in the \"defaults\", the former"
+      , "is taken."
+      ]
+    , "HOST_ARCH":
+      [ "The host CPU architecture. It is user's responsibility to"
+      , "adapt the \"defaults\" according to the provided value."
+      ]
+    }
+  , "config_transitions":
+    { "cargo_features":
+      [{"type": "CALL_EXPRESSION", "name": "for host as rlib"}]
+    , "crate_root": [{"type": "CALL_EXPRESSION", "name": "for host"}]
+    , "defaults": [{"type": "CALL_EXPRESSION", "name": "for host"}]
+    , "deps": [{"type": "CALL_EXPRESSION", "name": "for host as rlib"}]
+    , "srcs": [{"type": "CALL_EXPRESSION", "name": "for host"}]
+    }
+  , "imports":
+    { "call rustc artifact": ["./", "../rust", "call rustc artifact"]
+    , "for host": ["./", "../rust", "for host"]
+    , "for host as rlib": ["./", "../rust", "for host as rlib"]
+    , "get_runfiles": ["./", "..", "get_runfiles"]
+    }
+  , "implicit": {"defaults": [["./", "../rust", "defaults"]]}
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["crate_name", {"type": "FIELD", "name": "name"}]
+      , ["crate_type", "bin"]
+      , [ "stage"
+        , { "type": "if"
+          , "cond": {"type": "FIELD", "name": "stage"}
+          , "then":
+            { "type": "join"
+            , "$1": {"type": "FIELD", "name": "stage"}
+            , "separator": "/"
+            }
+          , "else": "."
+          }
+        ]
+      , ["crate_root", {"type": "FIELD", "name": "crate_root"}]
+      , ["edition", {"type": "FIELD", "name": "edition"}]
+      , ["srcs", {"type": "FIELD", "name": "srcs"}]
+      , ["deps", {"type": "FIELD", "name": "deps"}]
+      , ["cargo_features", {"type": "FIELD", "name": "cargo_features"}]
+      , ["emit", "link"]
+      , ["is_custom_build_script", true]
+      , ["transition", {"type": "CALL_EXPRESSION", "name": "for host"}]
+      , [ "deps-transition"
+        , {"type": "CALL_EXPRESSION", "name": "for host as rlib"}
+        ]
+      , ["version", {"type": "FIELD", "name": "version"}]
+      , ["pkg_name", {"type": "FIELD", "name": "pkg_name"}]
+      , ["defaults", {"type": "FIELD", "name": "defaults"}]
+      , [ "artifact result"
+        , {"type": "CALL_EXPRESSION", "name": "call rustc artifact"}
+        ]
+      , [ "exe"
+        , { "type": "assert"
+          , "msg":
+            { "type": "join"
+            , "$1":
+              [ "Expected single executable but found "
+              , {"type": "json_encode", "$1": {"type": "var", "name": "_"}}
+              ]
+            }
+          , "predicate":
+            { "type": "=="
+            , "$1":
+              { "type": "length"
+              , "$1": {"type": "keys", "$1": {"type": "var", "name": "_"}}
+              }
+            , "$2": 1
+            }
+          , "$1":
+            { "type": "lookup"
+            , "key": "artifact"
+            , "map": {"type": "var", "name": "artifact result"}
+            }
+          }
+        ]
+      , [ "exe_name"
+        , { "type": "lookup"
+          , "key": "artifact-name"
+          , "map": {"type": "var", "name": "artifact result"}
+          }
+        ]
+      , [ "out_name"
+        , { "type": "join"
+          , "$1": [{"type": "var", "name": "stage"}, "out"]
+          , "separator": "/"
+          }
+        ]
+      , [ "out"
+        , { "type": "ACTION"
+          , "outs": [{"type": "var", "name": "out_name"}]
+          , "inputs": {"type": "var", "name": "exe"}
+          , "cmd":
+            [ "sh"
+            , "-ce"
+            , { "type": "join"
+              , "$1":
+                [ { "type": "join_cmd"
+                  , "$1": [{"type": "var", "name": "exe_name"}]
+                  }
+                , " > "
+                , {"type": "var", "name": "out_name"}
+                , " && "
+                , { "type": "join_cmd"
+                  , "$1": ["cat", {"type": "var", "name": "out_name"}]
+                  }
+                , " | "
+                , { "type": "join_cmd"
+                  , "$1":
+                    [ "xargs"
+                    , "printf"
+                    , { "type": "join"
+                      , "$1":
+                        ["[", {"type": "var", "name": "stage"}, "] ", "%s\n"]
+                      , "separator": ""
+                      }
+                    ]
+                  }
+                ]
+              , "separator": ""
+              }
+            ]
+          , "env":
+            { "type": "lookup"
+            , "key": "env"
+            , "map": {"type": "var", "name": "artifact result"}
+            }
+          }
+        ]
+      , [ "file_args_name"
+        , { "type": "join"
+          , "$1": [{"type": "var", "name": "stage"}, "file_args"]
+          , "separator": "/"
+          }
+        ]
+      , [ "file_args"
+        , { "type": "ACTION"
+          , "outs": [{"type": "var", "name": "file_args_name"}]
+          , "inputs": {"type": "var", "name": "out"}
+          , "cmd":
+            [ "sh"
+            , "-c"
+            , { "type": "join"
+              , "$1":
+                [ { "type": "join_cmd"
+                  , "$1": ["cat", {"type": "var", "name": "out_name"}]
+                  }
+                , " | "
+                , { "type": "join_cmd"
+                  , "$1":
+                    [ "awk"
+                    , { "type": "join"
+                      , "$1":
+                        [ "/rustc-cfg/ {split($0,x,\"=\"); printf \"--cfg\\n%s\\n\", x[2]}"
+                        , "/rustc-link-arg/ {split($0,x,\"=\"); printf \"-Clink-arg=%s\\n\", x[2]}"
+                        ]
+                      , "separator": " "
+                      }
+                    ]
+                  }
+                , " > "
+                , {"type": "var", "name": "file_args_name"}
+                ]
+              , "separator": ""
+              }
+            ]
+          }
+        ]
+      , [ "args"
+        , { "type": "join"
+          , "$1": ["@", {"type": "var", "name": "file_args_name"}]
+          , "separator": ""
+          }
+        ]
+      ]
+    , "body":
+      { "type": "RESULT"
+      , "artifacts":
+        { "type": "map_union"
+        , "$1":
+          [ {"type": "var", "name": "exe"}
+          , {"type": "var", "name": "file_args"}
+          , {"type": "var", "name": "out"}
+          ]
+        }
+      , "provides":
+        { "type": "map_union"
+        , "$1":
+          [ { "type": "singleton_map"
+            , "key": "rust-compile-artifacts"
+            , "value": {"type": "var", "name": "file_args"}
+            }
+          , { "type": "singleton_map"
+            , "key": "rust-link-artifacts"
+            , "value": {"type": "var", "name": "file_args"}
+            }
+          , { "type": "singleton_map"
+            , "key": "rustc-compile-args"
+            , "value": [{"type": "var", "name": "args"}]
+            }
+          , { "type": "singleton_map"
+            , "key": "rustc-link-args"
+            , "value": [{"type": "var", "name": "args"}]
+            }
+          ]
+        }
+      }
+    }
+  }
+, "feature":
+  { "doc": ["A cargo feature."]
+  , "string_fields": ["name"]
+  , "target_fields": ["deps"]
+  , "field_doc":
+    { "name":
+      [ "The feature name. The flag `--cfg feature=<name>` is passed to"
+      , "the Rust compiler."
+      ]
+    , "deps":
+      ["Any other features or \"[rust, library]\" this feature depends", "on."]
+    }
+  , "imports":
+    { "disjoint_map_from_provides": ["./", "..", "disjoint_map_from_provides"]
+    , "flatten_from_provides": ["./", "..", "flatten_from_provides"]
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "feature_name"
+        , {"type": "[]", "index": 0, "list": {"type": "FIELD", "name": "name"}}
+        ]
+      , [ "my_feature_arg"
+        , [ "--cfg"
+          , { "type": "join"
+            , "$1":
+              ["feature=\"", {"type": "var", "name": "feature_name"}, "\""]
+            }
+          ]
+        ]
+      , ["deps", {"type": "FIELD", "name": "deps"}]
+      , ["range", {"type": "var", "name": "deps"}]
+      , [ "compile-deps"
+        , { "type": "let*"
+          , "bindings": [["key", "rust-compile-artifacts"]]
+          , "body":
+            {"type": "CALL_EXPRESSION", "name": "disjoint_map_from_provides"}
+          }
+        ]
+      , [ "link-deps"
+        , { "type": "let*"
+          , "bindings": [["key", "rust-link-artifacts"]]
+          , "body":
+            {"type": "CALL_EXPRESSION", "name": "disjoint_map_from_provides"}
+          }
+        ]
+      , [ "compile-deps-args"
+        , { "type": "let*"
+          , "bindings": [["key", "rustc-compile-args"]]
+          , "body":
+            {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+          }
+        ]
+      , [ "link-deps-args"
+        , { "type": "let*"
+          , "bindings": [["key", "rustc-link-args"]]
+          , "body":
+            {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+          }
+        ]
+      , [ "stage-deps-args"
+        , { "type": "let*"
+          , "bindings": [["key", "stage-args"]]
+          , "body":
+            {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+          }
+        ]
+      ]
+    , "body":
+      { "type": "RESULT"
+      , "provides":
+        { "type": "map_union"
+        , "$1":
+          [ { "type": "singleton_map"
+            , "key": "rust-compile-artifacts"
+            , "value": {"type": "var", "name": "compile-deps"}
+            }
+          , { "type": "singleton_map"
+            , "key": "rust-link-artifacts"
+            , "value": {"type": "var", "name": "link-deps"}
+            }
+          , { "type": "singleton_map"
+            , "key": "rustc-compile-args"
+            , "value":
+              { "type": "++"
+              , "$1":
+                [ {"type": "var", "name": "my_feature_arg"}
+                , {"type": "var", "name": "compile-deps-args"}
+                ]
+              }
+            }
+          , { "type": "singleton_map"
+            , "key": "rustc-link-args"
+            , "value":
+              { "type": "++"
+              , "$1":
+                [ {"type": "var", "name": "my_feature_arg"}
+                , {"type": "var", "name": "link-deps-args"}
+                ]
+              }
+            }
+          , { "type": "singleton_map"
+            , "key": "stage-args"
+            , "value": {"type": "var", "name": "stage-deps-args"}
+            }
+          ]
+        }
+      }
+    }
+  }
+}

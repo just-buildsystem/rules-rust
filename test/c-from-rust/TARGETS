@@ -1,0 +1,13 @@
+{ "main":
+  { "type": ["rules/rust", "binary"]
+  , "name": ["main"]
+  , "crate_root": ["main.rs"]
+  , "deps": [["./", "clib", "foo"]]
+  }
+, "c-from-rust":
+  { "type": ["@", "rules-cc", "shell/test", "script"]
+  , "name": ["c-from-rust"]
+  , "test": ["check_ints.sh"]
+  , "deps": ["main"]
+  }
+}

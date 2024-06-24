@@ -1,0 +1,194 @@
+{ "default_from_base":
+  { "doc":
+    [ "If the \"value\" is evaluated as null, the value associated to"
+    , "\"key\" is retrieved from the \"base\" targets."
+    ]
+  , "vars": ["base", "transition", "key", "value"]
+  , "imports": {"flatten_from_provides": "flatten_from_provides"}
+  , "expression":
+    { "type": "if"
+    , "cond": {"type": "var", "name": "value"}
+    , "then": {"type": "var", "name": "value"}
+    , "else":
+      { "type": "let*"
+      , "bindings": [["range", {"type": "var", "name": "base"}]]
+      , "body": {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+      }
+    }
+  }
+, "disjoint_map_from_provides":
+  { "doc":
+    [ "Performs a disjoint map union of the maps contained in the"
+    , "provides map of each element in the \"range\" under the key \"key\"."
+    ]
+  , "vars": ["range", "transition", "key"]
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "transition"
+        , { "type": "var"
+          , "name": "transition"
+          , "default": {"type": "empty_map"}
+          }
+        ]
+      ]
+    , "body":
+      { "type": "disjoint_map_union"
+      , "$1":
+        { "type": "foreach"
+        , "var": "x"
+        , "range": {"type": "var", "name": "range"}
+        , "body":
+          { "type": "DEP_PROVIDES"
+          , "dep": {"type": "var", "name": "x"}
+          , "provider": {"type": "var", "name": "key"}
+          , "default": {"type": "empty_map"}
+          , "transition": {"type": "var", "name": "transition"}
+          }
+        }
+      }
+    }
+  }
+, "flatten_from_provides":
+  { "doc":
+    [ "Flatten the lists contained in the provides map of each element"
+    , "in the \"range\" under the key \"key\"."
+    ]
+  , "vars": ["range", "transition", "key"]
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "transition"
+        , { "type": "var"
+          , "name": "transition"
+          , "default": {"type": "empty_map"}
+          }
+        ]
+      ]
+    , "body":
+      { "type": "++"
+      , "$1":
+        { "type": "foreach"
+        , "var": "x"
+        , "range": {"type": "var", "name": "range"}
+        , "body":
+          { "type": "DEP_PROVIDES"
+          , "dep": {"type": "var", "name": "x"}
+          , "provider": {"type": "var", "name": "key"}
+          , "transition": {"type": "var", "name": "transition"}
+          }
+        }
+      }
+    }
+  }
+, "get_artifacts":
+  { "vars": ["field_content", "transition"]
+  , "expression":
+    { "type": "disjoint_map_union"
+    , "$1":
+      { "type": "foreach"
+      , "var": "x"
+      , "range": {"type": "var", "name": "field_content"}
+      , "body":
+        { "type": "DEP_ARTIFACTS"
+        , "dep": {"type": "var", "name": "x"}
+        , "transition":
+          { "type": "var"
+          , "name": "transition"
+          , "default": {"type": "empty_map"}
+          }
+        }
+      }
+    }
+  }
+, "get_runfiles":
+  { "vars": ["field_content", "transition"]
+  , "expression":
+    { "type": "disjoint_map_union"
+    , "$1":
+      { "type": "foreach"
+      , "var": "x"
+      , "range": {"type": "var", "name": "field_content"}
+      , "body":
+        { "type": "DEP_RUNFILES"
+        , "dep": {"type": "var", "name": "x"}
+        , "transition":
+          { "type": "var"
+          , "name": "transition"
+          , "default": {"type": "empty_map"}
+          }
+        }
+      }
+    }
+  }
+, "get_unique_artifact":
+  { "doc":
+    [ "Retrive the unique artifact. Asserts double checks that the"
+    , "\"field_content\" evaluates to a single artifact."
+    ]
+  , "vars": ["field_name", "field_content", "transition"]
+  , "imports": {"get_artifacts": "get_artifacts"}
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "_"
+        , { "type": "assert_non_empty"
+          , "msg":
+            { "type": "join"
+            , "$1":
+              [ "Please define field "
+              , { "type": "json_encode"
+                , "$1": {"type": "var", "name": "field_name"}
+                }
+              , ". It cannot be empty."
+              ]
+            , "separator": ""
+            }
+          , "$1": {"type": "var", "name": "field_content"}
+          }
+        ]
+      , ["artifacts", {"type": "CALL_EXPRESSION", "name": "get_artifacts"}]
+      , [ "_"
+        , { "type": "assert"
+          , "msg":
+            { "type": "join"
+            , "$1":
+              [ { "type": "json_encode"
+                , "$1": {"type": "var", "name": "field_name"}
+                }
+              , " must evaluate to exactly one artifact but found "
+              , { "type": "json_encode"
+                , "$1": {"type": "var", "name": "artifacts"}
+                }
+              ]
+            , "separator": ""
+            }
+          , "predicate":
+            { "type": "=="
+            , "$1": {"type": "length", "$1": {"type": "var", "name": "_"}}
+            , "$2": 1
+            }
+          , "$1": {"type": "keys", "$1": {"type": "var", "name": "artifacts"}}
+          }
+        ]
+      ]
+    , "body": {"type": "var", "name": "artifacts"}
+    }
+  }
+, "stage_unique_artifact":
+  { "vars": ["artifact", "name"]
+  , "expression":
+    { "type": "disjoint_map_union"
+    , "$1":
+      { "type": "foreach"
+      , "var": "x"
+      , "range": {"type": "values", "$1": {"type": "var", "name": "artifact"}}
+      , "body":
+        { "type": "singleton_map"
+        , "key": {"type": "var", "name": "name"}
+        , "value": {"type": "var", "name": "x"}
+        }
+      }
+    }
+  }
+}

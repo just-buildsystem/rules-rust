@@ -1,0 +1,19 @@
+{ "foo":
+  { "type": ["@", "rules-cc", "CC", "library"]
+  , "pure C": ["true"]
+  , "name": ["foo"]
+  , "srcs": ["foo.c"]
+  , "hdrs": ["foo.h"]
+  , "stage": ["foo"]
+  , "deps": ["bar"]
+  }
+, "bar":
+  { "type": ["@", "rules-cc", "CC", "library"]
+  , "pure C": ["true"]
+  , "name": ["bar"]
+  , "srcs": ["bar.c"]
+  , "hdrs": ["bar.h"]
+  , "ldflags": ["-lm"]
+  , "stage": ["bar"]
+  }
+}

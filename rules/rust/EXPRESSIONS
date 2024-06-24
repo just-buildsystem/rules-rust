@@ -1,0 +1,1319 @@
+{ "call rustc":
+  { "vars": ["cmd", "inputs", "outs", "out_dirs", "env"]
+  , "expression":
+    { "type": "ACTION"
+    , "outs": {"type": "var", "name": "outs", "default": []}
+    , "inputs": {"type": "var", "name": "inputs"}
+    , "cmd": {"type": "var", "name": "cmd"}
+    , "env": {"type": "var", "name": "env"}
+    , "out_dirs": {"type": "var", "name": "out_dirs", "default": []}
+    }
+  }
+, "call rustc artifact":
+  { "doc":
+    [ "The artifact produced by the calling of the Rust compiler. The"
+    , "expression \"call rustc result\" first calls this expression."
+    ]
+  , "vars":
+    [ "crate_root"
+    , "crate_name"
+    , "deps"
+    , "crate_type"
+    , "srcs"
+    , "edition"
+    , "cargo_features"
+    , "stage"
+    , "build_script"
+    , "emit"
+    , "rmeta"
+    , "runner"
+    , "transition"
+    , "deps-transition"
+    , "version"
+    , "test"
+    , "defaults"
+    , "pkg_name"
+    , "ENV"
+    ]
+  , "imports":
+    { "call rustc": "call rustc"
+    , "disjoint_map_from_provides": ["./", "..", "disjoint_map_from_provides"]
+    , "flatten_from_provides": ["./", "..", "flatten_from_provides"]
+    , "for host": "for host"
+    , "get_artifacts": ["./", "..", "get_artifacts"]
+    , "get_runfiles": ["./", "..", "get_runfiles"]
+    , "get_unique_artifact": ["./", "..", "get_unique_artifact"]
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "crate_root"
+        , { "type": "let*"
+          , "bindings":
+            [ [ "transition"
+              , { "type": "var"
+                , "name": "transition"
+                , "default": {"type": "empty_map"}
+                }
+              ]
+            , ["field_name", "crate_root"]
+            , ["field_content", {"type": "var", "name": "crate_root"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "get_unique_artifact"}
+          }
+        ]
+      , [ "crate_root_name"
+        , { "type": "join"
+          , "$1": {"type": "keys", "$1": {"type": "var", "name": "crate_root"}}
+          }
+        ]
+      , [ "crate_name"
+        , {"type": "join", "$1": {"type": "var", "name": "crate_name"}}
+        ]
+      , [ "srcs"
+        , { "type": "let*"
+          , "bindings":
+            [ [ "transition"
+              , { "type": "var"
+                , "name": "transition"
+                , "default": {"type": "empty_map"}
+                }
+              ]
+            , ["field_content", {"type": "var", "name": "srcs"}]
+            ]
+          , "body": {"type": "CALL_EXPRESSION", "name": "get_artifacts"}
+          }
+        ]
+      , [ "c-deps"
+        , { "type": "let*"
+          , "bindings":
+            [ [ "transition"
+              , { "type": "var"
+                , "name": "deps-transition"
+                , "default": {"type": "empty_map"}
+                }
+              ]
+            , ["field_content", {"type": "var", "name": "deps"}]
+            , [ "artifacts"
+              , {"type": "CALL_EXPRESSION", "name": "get_artifacts"}
+              ]
+            , ["runfiles", {"type": "CALL_EXPRESSION", "name": "get_runfiles"}]
+            , ["range", {"type": "var", "name": "deps"}]
+            , [ "compile-deps"
+              , { "type": "let*"
+                , "bindings": [["key", "compile-deps"]]
+                , "body":
+                  { "type": "CALL_EXPRESSION"
+                  , "name": "disjoint_map_from_provides"
+                  }
+                }
+              ]
+            , [ "link-deps"
+              , { "type": "let*"
+                , "bindings": [["key", "link-deps"]]
+                , "body":
+                  { "type": "CALL_EXPRESSION"
+                  , "name": "disjoint_map_from_provides"
+                  }
+                }
+              ]
+            ]
+          , "body":
+            { "type": "map_union"
+            , "$1":
+              [ {"type": "var", "name": "runfiles"}
+              , {"type": "var", "name": "artifacts"}
+              , {"type": "var", "name": "compile-deps"}
+              , {"type": "var", "name": "link-deps"}
+              ]
+            }
+          }
+        ]
+      , [ "run-libs"
+        , { "type": "let*"
+          , "bindings":
+            [ [ "transition"
+              , { "type": "var"
+                , "name": "deps-transition"
+                , "default": {"type": "empty_map"}
+                }
+              ]
+            , ["range", {"type": "var", "name": "deps"}]
+            , ["key", "run-libs"]
+            ]
+          , "body":
+            {"type": "CALL_EXPRESSION", "name": "disjoint_map_from_provides"}
+          }
+        ]
+      , [ "c-deps-link-args"
+        , { "type": "let*"
+          , "bindings":
+            [ ["range", {"type": "var", "name": "deps"}]
+            , [ "transition"
+              , { "type": "var"
+                , "name": "deps-transition"
+                , "default": {"type": "empty_map"}
+                }
+              ]
+            , ["key", "link-args"]
+            ]
+          , "body":
+            {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+          }
+        ]
+      , [ "c-deps-run-libs-args"
+        , { "type": "let*"
+          , "bindings":
+            [ [ "transition"
+              , { "type": "var"
+                , "name": "deps-transition"
+                , "default": {"type": "empty_map"}
+                }
+              ]
+            , ["range", {"type": "var", "name": "deps"}]
+            , ["key", "run-libs-args"]
+            ]
+          , "body":
+            {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+          }
+        ]
+      , [ "range"
+        , { "type": "++"
+          , "$1":
+            [ {"type": "var", "name": "deps"}
+            , {"type": "var", "name": "cargo_features"}
+            , {"type": "var", "name": "build_script", "default": []}
+            ]
+          }
+        ]
+      , [ "compile-deps"
+        , { "type": "map_union"
+          , "$1":
+            [ {"type": "var", "name": "c-deps"}
+            , {"type": "var", "name": "run-libs"}
+            , { "type": "let*"
+              , "bindings":
+                [ [ "transition"
+                  , { "type": "var"
+                    , "name": "deps-transition"
+                    , "default": {"type": "empty_map"}
+                    }
+                  ]
+                , ["key", "rust-compile-artifacts"]
+                ]
+              , "body":
+                { "type": "CALL_EXPRESSION"
+                , "name": "disjoint_map_from_provides"
+                }
+              }
+            ]
+          }
+        ]
+      , [ "link-deps"
+        , { "type": "map_union"
+          , "$1":
+            [ {"type": "var", "name": "c-deps"}
+            , {"type": "var", "name": "run-libs"}
+            , { "type": "let*"
+              , "bindings":
+                [ [ "transition"
+                  , { "type": "var"
+                    , "name": "deps-transition"
+                    , "default": {"type": "empty_map"}
+                    }
+                  ]
+                , ["key", "rust-link-artifacts"]
+                ]
+              , "body":
+                { "type": "CALL_EXPRESSION"
+                , "name": "disjoint_map_from_provides"
+                }
+              }
+            ]
+          }
+        ]
+      , [ "compile-deps-args"
+        , { "type": "let*"
+          , "bindings":
+            [ [ "transition"
+              , { "type": "var"
+                , "name": "deps-transition"
+                , "default": {"type": "empty_map"}
+                }
+              ]
+            , ["key", "rustc-compile-args"]
+            ]
+          , "body":
+            {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+          }
+        ]
+      , [ "link-deps-args"
+        , { "type": "let*"
+          , "bindings":
+            [ [ "transition"
+              , { "type": "var"
+                , "name": "deps-transition"
+                , "default": {"type": "empty_map"}
+                }
+              ]
+            , ["key", "rustc-link-args"]
+            ]
+          , "body":
+            {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+          }
+        ]
+      , [ "stage-deps-args"
+        , { "type": "let*"
+          , "bindings":
+            [ [ "transition"
+              , { "type": "var"
+                , "name": "deps-transition"
+                , "default": {"type": "empty_map"}
+                }
+              ]
+            , ["key", "stage-args"]
+            ]
+          , "body":
+            {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+          }
+        ]
+      , ["range", {"type": "var", "name": "defaults"}]
+      , [ "transition"
+        , { "type": "var"
+          , "name": "transition"
+          , "default": {"type": "empty_map"}
+          }
+        ]
+      , [ "TARGET"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "TARGET"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          }
+        ]
+      , [ "HOST"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "HOST"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          }
+        ]
+      , [ "RUSTC"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "RUSTC"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          }
+        ]
+      , [ "RUSTC_FLAGS"
+        , { "type": "let*"
+          , "bindings": [["key", "RUSTC_FLAGS"]]
+          , "body":
+            {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+          }
+        ]
+      , [ "ADD_RUSTC_FLAGS"
+        , { "type": "let*"
+          , "bindings": [["key", "ADD_RUSTC_FLAGS"]]
+          , "body":
+            {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+          }
+        ]
+      , [ "PATH"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "PATH"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          , "separator": ":"
+          }
+        ]
+      , [ "CARGO_CFG_TARGET_ARCH"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "CARGO_CFG_TARGET_ARCH"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          }
+        ]
+      , [ "CARGO_CFG_TARGET_ENDIAN"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "CARGO_CFG_TARGET_ENDIAN"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          }
+        ]
+      , [ "CARGO_CFG_TARGET_ENV"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "CARGO_CFG_TARGET_ENV"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          }
+        ]
+      , [ "CARGO_CFG_TARGET_FAMILY"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "CARGO_CFG_TARGET_FAMILY"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          }
+        ]
+      , [ "CARGO_CFG_TARGET_FEATURE"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "CARGO_CFG_TARGET_FEATURE"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          , "separator": ","
+          }
+        ]
+      , [ "CARGO_CFG_TARGET_HAS_ATOMIC"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "CARGO_CFG_TARGET_HAS_ATOMIC"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          , "separator": ","
+          }
+        ]
+      , [ "CARGO_CFG_TARGET_OS"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "CARGO_CFG_TARGET_OS"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          }
+        ]
+      , [ "CARGO_CFG_TARGET_POINTER_WIDTH"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "CARGO_CFG_TARGET_POINTER_WIDTH"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          }
+        ]
+      , [ "CARGO_CFG_TARGET_VENDOR"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "CARGO_CFG_TARGET_VENDOR"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          }
+        ]
+      , [ "CARGO_CFG_UNIX"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "CARGO_CFG_UNIX"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          }
+        ]
+      , [ "CARGO_CFG_WINDOWS"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "CARGO_CFG_WINDOWS"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          }
+        ]
+      , [ "CARGO_ENCODED_RUSTFLAGS"
+        , { "type": "join"
+          , "$1":
+            { "type": "let*"
+            , "bindings": [["key", "CARGO_ENCODED_RUSTFLAGS"]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
+            }
+          }
+        ]
+      , [ "edition"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "edition"}
+          , "then": {"type": "join", "$1": {"type": "var", "name": "edition"}}
+          , "else": "2015"
+          }
+        ]
+      , [ "cmd"
+        , [ "sh"
+          , "-c"
+          , { "type": "join"
+            , "$1":
+              [ { "type": "join_cmd"
+                , "$1":
+                  { "type": "++"
+                  , "$1":
+                    [ [ { "type": "var"
+                        , "name": "runner"
+                        , "default": {"type": "var", "name": "RUSTC"}
+                        }
+                      , {"type": "var", "name": "crate_root_name"}
+                      , "--crate-name"
+                      , {"type": "var", "name": "crate_name"}
+                      , "--crate-type"
+                      , {"type": "var", "name": "crate_type"}
+                      , "--emit"
+                      , {"type": "var", "name": "emit"}
+                      , "--edition"
+                      , {"type": "var", "name": "edition"}
+                      , "--out-dir"
+                      , {"type": "var", "name": "stage"}
+                      ]
+                    , {"type": "var", "name": "RUSTC_FLAGS"}
+                    , {"type": "var", "name": "ADD_RUSTC_FLAGS"}
+                    , { "type": "if"
+                      , "cond": {"type": "var", "name": "TARGET"}
+                      , "then": ["--target", {"type": "var", "name": "TARGET"}]
+                      , "else": []
+                      }
+                    , { "type": "if"
+                      , "cond": {"type": "var", "name": "LINKER"}
+                      , "then":
+                        [ "-C"
+                        , { "type": "join"
+                          , "$1":
+                            ["linker=", {"type": "var", "name": "LINKER"}]
+                          }
+                        ]
+                      , "else": []
+                      }
+                    , { "type": "if"
+                      , "cond": {"type": "var", "name": "test"}
+                      , "then": ["--test"]
+                      , "else": []
+                      }
+                    , { "type": "case"
+                      , "case":
+                        { "bin": {"type": "var", "name": "link-deps-args"}
+                        , "cdylib": {"type": "var", "name": "link-deps-args"}
+                        , "dylib": {"type": "var", "name": "link-deps-args"}
+                        , "proc-macro":
+                          {"type": "var", "name": "link-deps-args"}
+                        , "rlib": {"type": "var", "name": "compile-deps-args"}
+                        , "staticlib":
+                          {"type": "var", "name": "link-deps-args"}
+                        }
+                      , "expr": {"type": "var", "name": "crate_type"}
+                      }
+                    , { "type": "if"
+                      , "cond":
+                        { "type": "=="
+                        , "$1": {"type": "var", "name": "crate_type"}
+                        , "$2": "proc-macro"
+                        }
+                      , "then": ["--extern", "proc_macro"]
+                      , "else": []
+                      }
+                    , { "type": "if"
+                      , "cond": {"type": "var", "name": "c-deps-link-args"}
+                      , "then":
+                        { "type": "let*"
+                        , "bindings":
+                          [ [ "args"
+                            , { "type": "++"
+                              , "$1":
+                                [ ["-Clink-arg=-Wl"]
+                                , {"type": "var", "name": "c-deps-link-args"}
+                                ]
+                              }
+                            ]
+                          ]
+                        , "body":
+                          [ { "type": "join"
+                            , "$1": {"type": "var", "name": "args"}
+                            , "separator": ","
+                            }
+                          ]
+                        }
+                      , "else": []
+                      }
+                    , { "type": "if"
+                      , "cond": {"type": "var", "name": "c-deps-run-libs-args"}
+                      , "then":
+                        { "type": "let*"
+                        , "bindings":
+                          [ [ "args"
+                            , { "type": "++"
+                              , "$1":
+                                [ ["-Clink-arg=-Wl"]
+                                , { "type": "var"
+                                  , "name": "c-deps-run-libs-args"
+                                  }
+                                ]
+                              }
+                            ]
+                          ]
+                        , "body":
+                          [ { "type": "join"
+                            , "$1": {"type": "var", "name": "args"}
+                            , "separator": ","
+                            }
+                          ]
+                        }
+                      , "else": []
+                      }
+                    ]
+                  }
+                }
+              , "--remap-path-prefix"
+              , "\"${PWD}=\""
+              ]
+            , "separator": " "
+            }
+          ]
+        ]
+      , [ "inputs"
+        , { "type": "map_union"
+          , "$1":
+            [ {"type": "var", "name": "crate_root"}
+            , {"type": "var", "name": "srcs"}
+            , { "type": "case"
+              , "case":
+                { "bin": {"type": "var", "name": "link-deps"}
+                , "cdylib": {"type": "var", "name": "link-deps"}
+                , "dylib": {"type": "var", "name": "link-deps"}
+                , "proc-macro": {"type": "var", "name": "link-deps"}
+                , "rlib": {"type": "var", "name": "compile-deps"}
+                , "staticlib": {"type": "var", "name": "link-deps"}
+                }
+              , "expr": {"type": "var", "name": "crate_type"}
+              }
+            ]
+          }
+        ]
+      , [ "outs"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "rmeta"}
+          , "then":
+            [ { "type": "join"
+              , "$1":
+                [ {"type": "var", "name": "stage"}
+                , { "type": "join"
+                  , "$1":
+                    ["lib", {"type": "var", "name": "crate_name"}, ".rmeta"]
+                  , "separator": ""
+                  }
+                ]
+              , "separator": "/"
+              }
+            ]
+          , "else":
+            { "type": "case"
+            , "case":
+              { "bin":
+                [ { "type": "join"
+                  , "$1":
+                    [ {"type": "var", "name": "stage"}
+                    , {"type": "var", "name": "crate_name"}
+                    ]
+                  , "separator": "/"
+                  }
+                ]
+              , "cdylib":
+                [ { "type": "join"
+                  , "$1":
+                    [ {"type": "var", "name": "stage"}
+                    , { "type": "join"
+                      , "$1":
+                        ["lib", {"type": "var", "name": "crate_name"}, ".so"]
+                      , "separator": ""
+                      }
+                    ]
+                  , "separator": "/"
+                  }
+                ]
+              , "dylib":
+                [ { "type": "join"
+                  , "$1":
+                    [ {"type": "var", "name": "stage"}
+                    , { "type": "join"
+                      , "$1":
+                        ["lib", {"type": "var", "name": "crate_name"}, ".so"]
+                      , "separator": ""
+                      }
+                    ]
+                  , "separator": "/"
+                  }
+                ]
+              , "proc-macro":
+                [ { "type": "join"
+                  , "$1":
+                    [ {"type": "var", "name": "stage"}
+                    , { "type": "join"
+                      , "$1":
+                        ["lib", {"type": "var", "name": "crate_name"}, ".so"]
+                      , "separator": ""
+                      }
+                    ]
+                  , "separator": "/"
+                  }
+                ]
+              , "rlib":
+                [ { "type": "join"
+                  , "$1":
+                    [ {"type": "var", "name": "stage"}
+                    , { "type": "join"
+                      , "$1":
+                        ["lib", {"type": "var", "name": "crate_name"}, ".rlib"]
+                      , "separator": ""
+                      }
+                    ]
+                  , "separator": "/"
+                  }
+                ]
+              , "staticlib":
+                [ { "type": "join"
+                  , "$1":
+                    [ {"type": "var", "name": "stage"}
+                    , { "type": "join"
+                      , "$1":
+                        ["lib", {"type": "var", "name": "crate_name"}, ".a"]
+                      , "separator": ""
+                      }
+                    ]
+                  , "separator": "/"
+                  }
+                ]
+              }
+            , "expr": {"type": "var", "name": "crate_type"}
+            }
+          }
+        ]
+      , ["OUT_DIR", {"type": "var", "name": "stage"}]
+      , [ "TARGET"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "TARGET"}
+          , "then": {"type": "var", "name": "TARGET"}
+          , "else": ""
+          }
+        ]
+      , [ "HOST"
+        , { "type": "if"
+          , "cond": {"type": "var", "name": "HOST"}
+          , "then": {"type": "var", "name": "HOST"}
+          , "else": ""
+          }
+        ]
+      , [ "CARGO_PKG_VERSION"
+        , { "type": "join"
+          , "$1": {"type": "var", "name": "version", "default": []}
+          , "separator": "."
+          }
+        ]
+      , [ "CARGO_PKG_VERSION_MAJOR"
+        , { "type": "[]"
+          , "index": 0
+          , "list": {"type": "var", "name": "version", "default": []}
+          , "default": ""
+          }
+        ]
+      , [ "CARGO_PKG_VERSION_MINOR"
+        , { "type": "[]"
+          , "index": 1
+          , "list": {"type": "var", "name": "version", "default": []}
+          , "default": ""
+          }
+        ]
+      , [ "CARGO_PKG_VERSION_PATCH"
+        , { "type": "[]"
+          , "index": 2
+          , "list": {"type": "var", "name": "version", "default": []}
+          , "default": ""
+          }
+        ]
+      , [ "CARGO_PKG_NAME"
+        , {"type": "join", "$1": {"type": "var", "name": "pkg_name"}}
+        ]
+      , [ "env"
+        , { "type": "map_union"
+          , "$1":
+            [ { "type": "env"
+              , "vars":
+                [ "RUSTC"
+                , "PATH"
+                , "OUT_DIR"
+                , "HOST"
+                , "TARGET"
+                , "CARGO_PKG_NAME"
+                , "CARGO_PKG_VERSION"
+                , "CARGO_PKG_VERSION_MAJOR"
+                , "CARGO_PKG_VERSION_MINOR"
+                , "CARGO_PKG_VERSION_PATCH"
+                ]
+              }
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "CARGO_CFG_TARGET_ARCH"}
+              , "then":
+                { "type": "singleton_map"
+                , "key": "CARGO_CFG_TARGET_ARCH"
+                , "value": {"type": "var", "name": "CARGO_CFG_TARGET_ARCH"}
+                }
+              , "else": {"type": "empty_map"}
+              }
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "CARGO_CFG_TARGET_ENDIAN"}
+              , "then":
+                { "type": "singleton_map"
+                , "key": "CARGO_CFG_TARGET_ENDIAN"
+                , "value": {"type": "var", "name": "CARGO_CFG_TARGET_ENDIAN"}
+                }
+              , "else": {"type": "empty_map"}
+              }
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "CARGO_CFG_TARGET_ENV"}
+              , "then":
+                { "type": "singleton_map"
+                , "key": "CARGO_CFG_TARGET_ENV"
+                , "value": {"type": "var", "name": "CARGO_CFG_TARGET_ENV"}
+                }
+              , "else": {"type": "empty_map"}
+              }
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "CARGO_CFG_TARGET_FAMILY"}
+              , "then":
+                { "type": "singleton_map"
+                , "key": "CARGO_CFG_TARGET_FAMILY"
+                , "value": {"type": "var", "name": "CARGO_CFG_TARGET_FAMILY"}
+                }
+              , "else": {"type": "empty_map"}
+              }
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "CARGO_CFG_TARGET_FEATURE"}
+              , "then":
+                { "type": "singleton_map"
+                , "key": "CARGO_CFG_TARGET_FEATURE"
+                , "value": {"type": "var", "name": "CARGO_CFG_TARGET_FEATURE"}
+                }
+              , "else": {"type": "empty_map"}
+              }
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "CARGO_CFG_TARGET_HAS_ATOMIC"}
+              , "then":
+                { "type": "singleton_map"
+                , "key": "CARGO_CFG_TARGET_HAS_ATOMIC"
+                , "value":
+                  {"type": "var", "name": "CARGO_CFG_TARGET_HAS_ATOMIC"}
+                }
+              , "else": {"type": "empty_map"}
+              }
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "CARGO_CFG_TARGET_OS"}
+              , "then":
+                { "type": "singleton_map"
+                , "key": "CARGO_CFG_TARGET_OS"
+                , "value": {"type": "var", "name": "CARGO_CFG_TARGET_OS"}
+                }
+              , "else": {"type": "empty_map"}
+              }
+            , { "type": "if"
+              , "cond":
+                {"type": "var", "name": "CARGO_CFG_TARGET_POINTER_WIDTH"}
+              , "then":
+                { "type": "singleton_map"
+                , "key": "CARGO_CFG_TARGET_POINTER_WIDTH"
+                , "value":
+                  {"type": "var", "name": "CARGO_CFG_TARGET_POINTER_WIDTH"}
+                }
+              , "else": {"type": "empty_map"}
+              }
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "CARGO_CFG_TARGET_VENDOR"}
+              , "then":
+                { "type": "singleton_map"
+                , "key": "CARGO_CFG_TARGET_VENDOR"
+                , "value": {"type": "var", "name": "CARGO_CFG_TARGET_VENDOR"}
+                }
+              , "else": {"type": "empty_map"}
+              }
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "CARGO_CFG_UNIX"}
+              , "then":
+                { "type": "singleton_map"
+                , "key": "CARGO_CFG_UNIX"
+                , "value": {"type": "var", "name": "CARGO_CFG_UNIX"}
+                }
+              , "else": {"type": "empty_map"}
+              }
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "CARGO_CFG_WINDOWS"}
+              , "then":
+                { "type": "singleton_map"
+                , "key": "CARGO_CFG_WINDOWS"
+                , "value": {"type": "var", "name": "CARGO_CFG_WINDOWS"}
+                }
+              , "else": {"type": "empty_map"}
+              }
+            , {"type": "var", "name": "ENV", "default": {"type": "empty_map"}}
+            ]
+          }
+        ]
+      , ["artifact", {"type": "CALL_EXPRESSION", "name": "call rustc"}]
+      , [ "artifact-name"
+        , {"type": "join", "$1": {"type": "var", "name": "outs"}}
+        ]
+      ]
+    , "body":
+      { "type": "map_union"
+      , "$1":
+        [ { "type": "env"
+          , "vars":
+            [ "artifact"
+            , "artifact-name"
+            , "stage-args"
+            , "link-deps"
+            , "compile-deps"
+            , "stage-deps-args"
+            , "run-libs"
+            , "c-deps-link-args"
+            , "c-deps-run-libs-args"
+            ]
+          }
+        , { "type": "singleton_map"
+          , "key": "env"
+          , "value": {"type": "var", "name": "env"}
+          }
+        ]
+      }
+    }
+  }
+, "call rustc result":
+  { "doc": ["The RESULT from the invocation of rustc."]
+  , "vars":
+    [ "crate_root"
+    , "crate_name"
+    , "deps"
+    , "crate_type"
+    , "srcs"
+    , "edition"
+    , "cargo_features"
+    , "stage"
+    , "build_script"
+    , "transition"
+    , "deps-transition"
+    , "version"
+    , "defaults"
+    , "pkg_name"
+    , "c_hdrs"
+    , "ENV"
+    ]
+  , "imports":
+    { "call rustc artifact": "call rustc artifact"
+    , "stage_unique_artifact": ["./", "..", "stage_unique_artifact"]
+    }
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ ["emit", "metadata,link"]
+      , [ "rmeta result"
+        , { "type": "if"
+          , "cond":
+            { "type": "=="
+            , "$1": {"type": "var", "name": "crate_type"}
+            , "$2": "bin"
+            }
+          , "then": {"type": "empty_map"}
+          , "else":
+            { "type": "let*"
+            , "bindings": [["rmeta", true]]
+            , "body":
+              {"type": "CALL_EXPRESSION", "name": "call rustc artifact"}
+            }
+          }
+        ]
+      , [ "link result"
+        , {"type": "CALL_EXPRESSION", "name": "call rustc artifact"}
+        ]
+      , ["emit", "metadata,link"]
+      , [ "crate_name"
+        , {"type": "join", "$1": {"type": "var", "name": "crate_name"}}
+        ]
+      , [ "stage_args"
+        , { "type": "++"
+          , "$1":
+            [ ["-L", {"type": "var", "name": "stage"}]
+            , { "type": "lookup"
+              , "key": "stage-deps-args"
+              , "map": {"type": "var", "name": "link result"}
+              }
+            ]
+          }
+        ]
+      , [ "link_arg_rmeta"
+        , { "type": "cond"
+          , "cond":
+            [ [ { "type": "=="
+                , "$1": {"type": "var", "name": "crate_type"}
+                , "$2": "bin"
+                }
+              , []
+              ]
+            , [ true
+              , { "type": "++"
+                , "$1":
+                  [ {"type": "var", "name": "stage_args"}
+                  , [ "--extern"
+                    , { "type": "join"
+                      , "$1":
+                        [ {"type": "var", "name": "crate_name"}
+                        , "="
+                        , { "type": "lookup"
+                          , "key": "artifact-name"
+                          , "map": {"type": "var", "name": "rmeta result"}
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ]
+            ]
+          }
+        ]
+      , [ "link_arg_rlib"
+        , { "type": "cond"
+          , "cond":
+            [ [ { "type": "=="
+                , "$1": {"type": "var", "name": "crate_type"}
+                , "$2": "bin"
+                }
+              , []
+              ]
+            , [ true
+              , { "type": "++"
+                , "$1":
+                  [ {"type": "var", "name": "stage_args"}
+                  , [ "--extern"
+                    , { "type": "join"
+                      , "$1":
+                        [ {"type": "var", "name": "crate_name"}
+                        , "="
+                        , { "type": "lookup"
+                          , "key": "artifact-name"
+                          , "map": {"type": "var", "name": "link result"}
+                          }
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ]
+            ]
+          }
+        ]
+      , [ "run-libs-map"
+        , { "type": "singleton_map"
+          , "key": "run-libs"
+          , "value":
+            { "type": "map_union"
+            , "$1":
+              [ { "type": "lookup"
+                , "key": "run-libs"
+                , "map": {"type": "var", "name": "link result"}
+                }
+              , { "type": "case"
+                , "case":
+                  { "bin": {"type": "empty_map"}
+                  , "cdylib":
+                    { "type": "lookup"
+                    , "key": "artifact"
+                    , "map": {"type": "var", "name": "link result"}
+                    }
+                  , "dylib":
+                    { "type": "lookup"
+                    , "key": "artifact"
+                    , "map": {"type": "var", "name": "link result"}
+                    }
+                  , "proc-macro": {"type": "empty_map"}
+                  , "rlib": {"type": "empty_map"}
+                  , "staticlib": {"type": "empty_map"}
+                  }
+                , "expr": {"type": "var", "name": "crate_type"}
+                }
+              ]
+            }
+          }
+        ]
+      ]
+    , "body":
+      { "type": "RESULT"
+      , "artifacts":
+        { "type": "map_union"
+        , "$1":
+          [ { "type": "lookup"
+            , "key": "artifact"
+            , "map": {"type": "var", "name": "link result"}
+            }
+          ]
+        }
+      , "runfiles":
+        {"type": "var", "name": "c_hdrs", "default": {"type": "empty_map"}}
+      , "provides":
+        { "type": "cond"
+        , "cond":
+          [ [ { "type": "=="
+              , "$1": {"type": "var", "name": "crate_type"}
+              , "$2": "bin"
+              }
+            , {"type": "var", "name": "run-libs-map"}
+            ]
+          , [ true
+            , { "type": "map_union"
+              , "$1":
+                [ {"type": "var", "name": "run-libs-map"}
+                , { "type": "singleton_map"
+                  , "key": "rust-compile-artifacts"
+                  , "value":
+                    { "type": "if"
+                    , "cond":
+                      { "type": "=="
+                      , "$1": {"type": "var", "name": "crate_type"}
+                      , "$2": "proc-macro"
+                      }
+                    , "then":
+                      { "type": "map_union"
+                      , "$1":
+                        [ { "type": "lookup"
+                          , "key": "artifact"
+                          , "map": {"type": "var", "name": "link result"}
+                          }
+                        , { "type": "lookup"
+                          , "key": "link-deps"
+                          , "map": {"type": "var", "name": "link result"}
+                          }
+                        ]
+                      }
+                    , "else":
+                      { "type": "map_union"
+                      , "$1":
+                        [ { "type": "lookup"
+                          , "key": "artifact"
+                          , "map": {"type": "var", "name": "rmeta result"}
+                          }
+                        , { "type": "lookup"
+                          , "key": "compile-deps"
+                          , "map": {"type": "var", "name": "rmeta result"}
+                          }
+                        ]
+                      }
+                    }
+                  }
+                , { "type": "singleton_map"
+                  , "key": "rust-link-artifacts"
+                  , "value":
+                    { "type": "map_union"
+                    , "$1":
+                      [ { "type": "lookup"
+                        , "key": "artifact"
+                        , "map": {"type": "var", "name": "link result"}
+                        }
+                      , { "type": "lookup"
+                        , "key": "link-deps"
+                        , "map": {"type": "var", "name": "link result"}
+                        }
+                      ]
+                    }
+                  }
+                , { "type": "singleton_map"
+                  , "key": "rustc-compile-args"
+                  , "value":
+                    { "type": "if"
+                    , "cond":
+                      { "type": "=="
+                      , "$1": {"type": "var", "name": "crate_type"}
+                      , "$2": "proc-macro"
+                      }
+                    , "then":
+                      { "type": "++"
+                      , "$1": [{"type": "var", "name": "link_arg_rlib"}]
+                      }
+                    , "else":
+                      { "type": "++"
+                      , "$1": [{"type": "var", "name": "link_arg_rmeta"}]
+                      }
+                    }
+                  }
+                , { "type": "singleton_map"
+                  , "key": "rustc-link-args"
+                  , "value":
+                    { "type": "++"
+                    , "$1": [{"type": "var", "name": "link_arg_rlib"}]
+                    }
+                  }
+                , { "type": "singleton_map"
+                  , "key": "stage-args"
+                  , "value":
+                    { "type": "++"
+                    , "$1":
+                      [ ["-L", {"type": "var", "name": "stage"}]
+                      , { "type": "lookup"
+                        , "key": "stage-deps-args"
+                        , "map": {"type": "var", "name": "link result"}
+                        }
+                      ]
+                    }
+                  }
+                , { "type": "if"
+                  , "cond":
+                    { "type": "=="
+                    , "$1": {"type": "var", "name": "crate_type"}
+                    , "$2": "cdylib"
+                    }
+                  , "then":
+                    { "type": "let*"
+                    , "bindings":
+                      [ [ "basename"
+                        , { "type": "basename"
+                          , "$1":
+                            { "type": "lookup"
+                            , "key": "artifact-name"
+                            , "map": {"type": "var", "name": "link result"}
+                            }
+                          }
+                        ]
+                      , [ "run-libs"
+                        , { "type": "singleton_map"
+                          , "key": "run-libs"
+                          , "value":
+                            { "type": "let*"
+                            , "bindings":
+                              [ [ "artifact"
+                                , { "type": "lookup"
+                                  , "key": "artifact"
+                                  , "map":
+                                    {"type": "var", "name": "link result"}
+                                  }
+                                ]
+                              , ["name", {"type": "var", "name": "basename"}]
+                              ]
+                            , "body":
+                              { "type": "CALL_EXPRESSION"
+                              , "name": "stage_unique_artifact"
+                              }
+                            }
+                          }
+                        ]
+                      , [ "run-libs-args"
+                        , { "type": "singleton_map"
+                          , "key": "run-libs-args"
+                          , "value": [{"type": "var", "name": "basename"}]
+                          }
+                        ]
+                      ]
+                    , "body":
+                      { "type": "map_union"
+                      , "$1":
+                        [ {"type": "var", "name": "run-libs"}
+                        , {"type": "var", "name": "run-libs-args"}
+                        ]
+                      }
+                    }
+                  , "else": {"type": "empty_map"}
+                  }
+                , { "type": "if"
+                  , "cond":
+                    { "type": "=="
+                    , "$1": {"type": "var", "name": "crate_type"}
+                    , "$2": "staticlib"
+                    }
+                  , "then":
+                    { "type": "singleton_map"
+                    , "key": "link-args"
+                    , "value":
+                      { "type": "++"
+                      , "$1":
+                        [ [ { "type": "lookup"
+                            , "key": "artifact-name"
+                            , "map": {"type": "var", "name": "link result"}
+                            }
+                          ]
+                        , { "type": "lookup"
+                          , "key": "c-deps-link-args"
+                          , "map": {"type": "var", "name": "link result"}
+                          }
+                        , { "type": "lookup"
+                          , "key": "c-deps-run-libs-args"
+                          , "map": {"type": "var", "name": "link result"}
+                          }
+                        ]
+                      }
+                    }
+                  , "else": {"type": "empty_map"}
+                  }
+                ]
+              }
+            ]
+          ]
+        }
+      }
+    }
+  }
+, "for host":
+  { "doc": ["Transition to host required while cross-compiling."]
+  , "vars": ["ARCH", "HOST_ARCH", "TARGET_ARCH"]
+  , "expression":
+    { "type": "let*"
+    , "bindings":
+      [ [ "TARGET_ARCH"
+        , { "type": "var"
+          , "name": "HOST_ARCH"
+          , "default": {"type": "var", "name": "ARCH", "default": ""}
+          }
+        ]
+      ]
+    , "body": {"type": "env", "vars": ["TARGET_ARCH"]}
+    }
+  }
+, "for host as rlib":
+  { "vars": ["ARCH", "HOST_ARCH", "TARGET_ARCH"]
+  , "imports": {"for host": "for host", "to rlib": "to rlib"}
+  , "expression":
+    { "type": "disjoint_map_union"
+    , "$1":
+      [ {"type": "CALL_EXPRESSION", "name": "for host"}
+      , {"type": "CALL_EXPRESSION", "name": "to rlib"}
+      ]
+    }
+  }
+, "to rlib":
+  { "doc": ["Transition to rlib required for all rust deps."]
+  , "expression":
+    { "type": "let*"
+    , "bindings": [["RLIB", true]]
+    , "body": {"type": "env", "vars": ["RLIB"]}
+    }
+  }
+}

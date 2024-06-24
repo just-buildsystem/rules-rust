@@ -1,0 +1,14 @@
+{ "main": "rust-rules"
+, "repositories":
+  { "rust-rules":
+    { "repository": {"type": "file", "path": "."}
+    , "bindings": {"test-rules": "rules-test", "rules-cc": "rules-cc"}
+    }
+  , "imports": {"repository": {"type": "file", "path": "etc/imports"}}
+  , "test-rules":
+    { "repository": "rust-rules"
+    , "target_root": "imports"
+    , "target_file_name": "rules.TARGETS"
+    }
+  }
+}

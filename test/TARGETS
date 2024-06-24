@@ -1,0 +1,98 @@
+{ "static":
+  { "type": ["@", "test-rules", "test_rules", "test_case"]
+  , "name": ["static"]
+  , "targets":
+    [ "+baz-lib"
+    , "+bar-lib"
+    , "-bar-missing-baz"
+    , "+foo-lib"
+    , "+main"
+    , "-main-wrong-dep"
+    , "-main-missing-dep"
+    ]
+  , "asserts":
+    [ "test -f baz-lib/baz/libbaz.rlib"
+    , "! test -f baz-lib/baz/libbaz.rmeta"
+    , "test -f bar-lib/bar/libbar.rlib"
+    , "test -f main/bin/main"
+    , "./main/bin/main | grep baz"
+    , "./main/bin/main | grep bar"
+    , "./main/bin/main | grep foo"
+    ]
+  , "data": [["TREE", null, "static"]]
+  }
+, "static-native":
+  { "type": ["@", "test-rules", "test_rules", "test_case"]
+  , "name": ["static-native"]
+  , "targets":
+    [ "+baz-lib"
+    , "+bar-lib"
+    , "-bar-missing-baz"
+    , "+foo-lib"
+    , "+main"
+    , "-main-wrong-dep"
+    , "-main-missing-dep"
+    ]
+  , "asserts":
+    [ "test -f baz-lib/baz/libbaz.a"
+    , "! test -f baz-lib/baz/libbaz.rmeta"
+    , "! test -f baz-lib/baz/libbaz.rlib"
+    , "test -f bar-lib/bar/libbar.rlib"
+    , "test -f foo-lib/foo/libfoo.a"
+    , "test -f main/bin/main"
+    , "./main/bin/main | grep baz"
+    , "./main/bin/main | grep bar"
+    , "./main/bin/main | grep foo"
+    ]
+  , "data": [["TREE", null, "static-native"]]
+  }
+, "dynamic":
+  { "type": ["@", "test-rules", "test_rules", "test_case"]
+  , "name": ["dynamic"]
+  , "targets":
+    [ "+baz-lib"
+    , "+bar-lib"
+    , "-bar-missing-baz"
+    , "+foo-lib"
+    , "+main"
+    , "-main-wrong-dep"
+    , "-main-missing-dep"
+    ]
+  , "asserts":
+    [ "test -f baz-lib/baz/libbaz.rlib"
+    , "! test -f baz-lib/baz/libbaz.rmeta"
+    , "test -f bar-lib/bar/libbar.rlib"
+    , "test -f main/bin/main"
+    , "./main/bin/main | grep baz"
+    , "./main/bin/main | grep bar"
+    , "./main/bin/main | grep foo"
+    ]
+  , "data": [["TREE", null, "dynamic"]]
+  }
+, "build-script":
+  { "type": ["@", "test-rules", "test_rules", "test_case"]
+  , "name": ["build-script"]
+  , "targets": ["+build_script", "+main"]
+  , "asserts":
+    [ "test -f build_script/bar/build_script"
+    , "test -f build_script/bar/file_args"
+    , "test -f build_script/bar/out"
+    , "! ./main/bin/main | grep bar"
+    , "./main/bin/main | grep \"build script\""
+    , "./main/bin/main | grep foo"
+    ]
+  , "data": [["TREE", null, "build-script"]]
+  }
+, "ALL":
+  { "type": "install"
+  , "deps":
+    [ "static"
+    , "static-native"
+    , "dynamic"
+    , "build-script"
+    , ["./", "c-from-rust", "c-from-rust"]
+    ]
+  , "dirs": [[["./", "rust-from-c", "TESTS"], "rust-from-c"]]
+  , "tainted": ["test"]
+  }
+}

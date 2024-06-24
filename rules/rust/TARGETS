@@ -1,0 +1,171 @@
+{ "aarch64-unknown-linux-gnu":
+  { "type": "defaults"
+  , "CARGO_CFG_TARGET_ARCH": ["aarch64"]
+  , "CARGO_CFG_TARGET_ENDIAN": ["little"]
+  , "CARGO_CFG_TARGET_ENV": ["gnu"]
+  , "CARGO_CFG_TARGET_FAMILY": ["unix"]
+  , "CARGO_CFG_TARGET_FEATURE": ["neon"]
+  , "CARGO_CFG_TARGET_HAS_ATOMIC": ["128,16,32,64,8,ptr"]
+  , "CARGO_CFG_TARGET_OS": ["linux"]
+  , "CARGO_CFG_TARGET_POINTER_WIDTH": ["64"]
+  , "CARGO_CFG_TARGET_VENDOR": ["unkwnown"]
+  , "CARGO_CFG_UNIX": ["true"]
+  , "TARGET": ["aarch64-unknown-linux-gnu"]
+  }
+, "defaults":
+  { "type": "defaults"
+  , "arguments_config":
+    ["DEBUG", "ARCH", "TARGET_ARCH", "HOST_ARCH", "TOOLCHAIN_CONFIG", "ENV"]
+  , "PATH": ["/usr/bin", "/bin"]
+  , "RUSTC":
+    [ { "type": "lookup"
+      , "key": "RUSTC"
+      , "map":
+        { "type": "lookup"
+        , "key": "RUST"
+        , "map":
+          { "type": "var"
+          , "name": "TOOLCHAIN_CONFIG"
+          , "default": {"type": "empty_map"}
+          }
+        , "default": {"type": "empty_map"}
+        }
+      , "default":
+        { "type": "let*"
+        , "bindings":
+          [ [ "rustup-home"
+            , { "type": "lookup"
+              , "key": "RUSTUP_HOME"
+              , "map":
+                { "type": "lookup"
+                , "key": "RUST"
+                , "map":
+                  { "type": "var"
+                  , "name": "TOOLCHAIN_CONFIG"
+                  , "default": {"type": "empty_map"}
+                  }
+                , "default": {"type": "empty_map"}
+                }
+              }
+            ]
+          , [ "toolchain"
+            , { "type": "lookup"
+              , "key": "TOOLCHAIN"
+              , "map":
+                { "type": "lookup"
+                , "key": "RUST"
+                , "map":
+                  { "type": "var"
+                  , "name": "TOOLCHAIN_CONFIG"
+                  , "default": {"type": "empty_map"}
+                  }
+                , "default": {"type": "empty_map"}
+                }
+              }
+            ]
+          , [ "rustc"
+            , { "type": "if"
+              , "cond": {"type": "var", "name": "rustup-home"}
+              , "then":
+                { "type": "join"
+                , "$1":
+                  [ {"type": "var", "name": "rustup-home"}
+                  , "toolchains"
+                  , { "type": "join"
+                    , "$1":
+                      [ { "type": "var"
+                        , "name": "toolchain"
+                        , "default": "stable"
+                        }
+                      , { "type": "var"
+                        , "name": "HOST_ARCH"
+                        , "default":
+                          { "type": "var"
+                          , "name": "ARCH"
+                          , "default":
+                            { "type": "fail"
+                            , "msg":
+                              { "type": "join"
+                              , "$1":
+                                [ "To properly select a Rust compiler under the RUSTUP_HOME directory \""
+                                , {"type": "var", "name": "rustup-home"}
+                                , "\" please provide either ARCH or HOST_ARCH."
+                                ]
+                              , "separator": ""
+                              }
+                            }
+                          }
+                        }
+                      , "unknown"
+                      , "linux"
+                      , "gnu"
+                      ]
+                    , "separator": "-"
+                    }
+                  , "bin"
+                  , "rustc"
+                  ]
+                , "separator": "/"
+                }
+              , "else": "rustc"
+              }
+            ]
+          ]
+        , "body": {"type": "var", "name": "rustc"}
+        }
+      }
+    ]
+  , "RUSTC_FLAGS":
+    { "type": "++"
+    , "$1":
+      [ ["--color=always", "--cap-lints=warn"]
+      , { "type": "if"
+        , "cond": {"type": "var", "name": "DEBUG"}
+        , "then": []
+        , "else":
+          ["-Copt-level=2", "--codegen=debuginfo=0", "-Cembed-bitcode=no"]
+        }
+      ]
+    }
+  , "base":
+    { "type": "case"
+    , "case":
+      { "": []
+      , "aarch64": ["aarch64-unknown-linux-gnu"]
+      , "wasm32": ["wasm32-unknown-unknown"]
+      , "x86_64": ["x86_64-unknown-linux-gnu"]
+      }
+    , "expr":
+      { "type": "var"
+      , "name": "TARGET_ARCH"
+      , "default": {"type": "var", "name": "ARCH", "default": ""}
+      }
+    }
+  }
+, "wasm32-unknown-unknown":
+  { "type": "defaults"
+  , "CARGO_CFG_TARGET_ARCH": ["wasm32"]
+  , "CARGO_CFG_TARGET_ENDIAN": ["little"]
+  , "CARGO_CFG_TARGET_ENV": [""]
+  , "CARGO_CFG_TARGET_FAMILY": ["wasm"]
+  , "CARGO_CFG_TARGET_HAS_ATOMIC": ["16,32,64,8,ptr"]
+  , "CARGO_CFG_TARGET_OS": ["unknown"]
+  , "CARGO_CFG_TARGET_POINTER_WIDTH": ["32"]
+  , "CARGO_CFG_TARGET_VENDOR": ["unkwnown"]
+  , "TARGET": ["wasm32-unknown-unknown"]
+  }
+, "x86_64-unknown-linux-gnu":
+  { "type": "defaults"
+  , "CARGO_CFG_TARGET_ARCH": ["x86_64"]
+  , "CARGO_CFG_TARGET_ENDIAN": ["little"]
+  , "CARGO_CFG_TARGET_ENV": ["gnu"]
+  , "CARGO_CFG_TARGET_FAMILY": ["unix"]
+  , "CARGO_CFG_TARGET_FEATURE": ["fxsr,sse,sse2"]
+  , "CARGO_CFG_TARGET_HAS_ATOMIC": ["16,32,64,8,ptr"]
+  , "CARGO_CFG_TARGET_OS": ["linux"]
+  , "CARGO_CFG_TARGET_POINTER_WIDTH": ["64"]
+  , "CARGO_CFG_TARGET_VENDOR": ["unkwnown"]
+  , "CARGO_CFG_UNIX": ["true"]
+  , "TARGET": ["x86_64-unknown-linux-gnu"]
+  }
+}
