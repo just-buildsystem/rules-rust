@@ -1,0 +1,6 @@
+{ "hello":
+  { "type": ["@", "rules", "rust", "binary"]
+  , "name": ["hello"]
+  , "crate_root": ["main.rs"]
+  }
+}
