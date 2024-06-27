@@ -218,6 +218,11 @@
               , "separator": ""
               }
             ]
+          , "env":
+            { "type": "lookup"
+            , "key": "env"
+            , "map": {"type": "var", "name": "artifact result"}
+            }
           }
         ]
       , [ "args"
