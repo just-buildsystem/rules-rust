@@ -698,6 +698,7 @@ def main():
         "target_root": "rust-rules-defaults",
         "rule_root": "rust-rules-root",
         "bindings": {"orig-rules": "rust-rules-root"},
+        "target_file_name": "TARGETS.cargo_import"
     }
 
     main_rep = repo_name(root_name, root_version)
@@ -715,7 +716,7 @@ def main():
 
     defaults_dir = os.path.join(repo_root, "etc", "defaults", "rust")
     os.makedirs(defaults_dir, exist_ok=True)
-    with open(os.path.join(defaults_dir, "TARGETS"), "w") as f:
+    with open(os.path.join(defaults_dir, "TARGETS.cargo_import"), "w") as f:
         print(hdumps(defaults_dict), file=f)
 
     for pkg in metadata["packages"]:
