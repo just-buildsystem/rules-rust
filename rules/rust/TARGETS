@@ -15,8 +15,22 @@
 , "defaults":
   { "type": "defaults"
   , "arguments_config":
-    ["DEBUG", "ARCH", "TARGET_ARCH", "HOST_ARCH", "TOOLCHAIN_CONFIG", "ENV"]
-  , "PATH": ["/usr/bin", "/bin"]
+    ["DEBUG", "ARCH", "TARGET_ARCH", "HOST_ARCH", "TOOLCHAIN_CONFIG"]
+  , "PATH":
+    { "type": "lookup"
+    , "key": "PATH"
+    , "map":
+      { "type": "lookup"
+      , "key": "RUST"
+      , "map":
+        { "type": "var"
+        , "name": "TOOLCHAIN_CONFIG"
+        , "default": {"type": "empty_map"}
+        }
+      , "default": {"type": "empty_map"}
+      }
+    , "default": ["/usr/bin", "/bin"]
+    }
   , "RUSTC":
     [ { "type": "lookup"
       , "key": "RUSTC"
