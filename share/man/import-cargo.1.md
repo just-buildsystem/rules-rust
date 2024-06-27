@@ -13,11 +13,11 @@ SYNOPSIS
 DESCRIPTION
 ===========
 
-Given a physical repository where one sudirectory has the file
+Given a physical repository where one subdirectory has the file
 layout of a crate and a **`just-mr-repository-config`**(5) on
 standard input,
- - extend the repository configuration by a logical repsitory for
-   that cate, as well as logical repositories for all the transitive
+ - extend the repository configuration by a logical repository for
+   that crate, as well as logical repositories for all the transitive
    dependencies as reported by **`cargo`**(1) when asked for the
    development dependencies of the given crate,
  - generate the needed target files in the directory *`etc/deps-rust`*
@@ -54,7 +54,7 @@ content-fixed anyway.
 **`-t`**, **`--recompute-targets`**  
 Recompute all target files, even if cached.
 
-**`-r`**, **`--recomptue-repos`**  
+**`-r`**, **`--recompute-repos`**  
 Recompute all repositories, even if cached.
 
 **`-s`**, **`--recompute-sources`**  

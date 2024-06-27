@@ -679,7 +679,7 @@
       [ "The name of the test being built. Note that during execution,"
       , "the test binary will be restaged to \"test\"."
       ]
-    , "args": ["Additonal arguments to be passed when running the test."]
+    , "args": ["Additional arguments to be passed when running the test."]
     , "cargo_features":
       ["List of cargo features this test requires to be enabled."]
     , "crate_root":

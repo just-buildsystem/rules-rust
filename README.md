@@ -103,7 +103,7 @@ host configuration.
 
 | Field | Description |
 | ----- | ----------- |
-| `"args"` | Additonal arguments to be passed when running the test. |
+| `"args"` | Additional arguments to be passed when running the test. |
 | `"cargo_features"` | List of cargo features this test requires to be enabled. |
 | `"crate_root"` | The crate to be fed to the Rust compiler. It must evaluate to a single artifact/file. |
 | `"data"` | Any files and directories the test binary needs when running. |
