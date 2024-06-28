@@ -25,6 +25,33 @@ def main():
             """# Rust rules for the [`just`](https://github.com/just-buildsystem/justbuild) build system
 
 A collection of rules for building Rust libraries, binaries and unit tests.
+
+## How to use this repository
+There are two ways to import this repository. You can generate your
+`repos.json` from a template (`repos.template.json`) by importing
+the `rules-rust` repository with the tool `just-import-git`
+
+```sh
+$ just-import-git -C repos.template.json --as rules-rust -b master https://github.com/just-buildsystem/rules-rust > repos.json
+```
+
+Alternatively, the `rules-rust` repository can be added manually to
+your `repos.json`.
+
+``` jsonc
+...
+  , "rules-rust":
+    { "repository":
+      { "type": "git"
+      , "branch": "master"
+      , "repository": "https://github.com/just-buildsystem/rules-rust"
+      , "commit": "1a8211bda5c14ef0b2bff3af062c049d5598f02f"
+      , "subdir": "rules"
+      }
+    }
+...
+```
+
 """,
             file=f,
         )
