@@ -294,7 +294,7 @@ def compute_srcs(root_dir: str, name: str, version: str) -> List[Any]:
 
     with open(srcs_file, "w") as f:
         print(json.dumps(srcs), file=f)
-    return srcs
+    return sorted(srcs)
 
 
 def to_underscore(x: str):
