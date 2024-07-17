@@ -20,11 +20,11 @@ $ tree
 ├── ROOT
 └── TARGETS
 
-0 directories, 5 files
+1 directories, 5 files
 ```
 
 Apart from the `README.md` (this file) and `main.rs`, which should be expected, three additional files are required:
- - `ROOT`, which is just an empty file that sets the worspace root of the given project;
+ - `ROOT`, which is just an empty file that sets the workspace root of the given project;
  - `etc/repos.json` contains all the repositories involved - can you guess how many repos we need?
  - `TARGETS`, which contains the target descriptions.
 
@@ -298,7 +298,7 @@ The `foo/TARGETS` file can be as simple as
   , "name": ["foo"]
   , "crate_root": ["foo.rs"]
   , "stage": ["foo"]
-  } 
+  }
 }
 ```
 
@@ -417,7 +417,6 @@ To become more acquainted with the Rust rules, you may want to:
 
  - let `foo` be a module instead of a separate library (hint:
    `foo/foo.rs` must be added to the `"srcs"` field of the `"hello"`
-   target;
+   target);
 
  - set the `rustc` edition for all the crates within this project.
- 
