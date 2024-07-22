@@ -1,0 +1,8 @@
+{ "foo_rust":
+  { "type": ["@", "rules-rust", "rust", "library"]
+  , "name": ["foo_rust"]
+  , "crate_root": ["foo.rs"]
+  , "stage": ["foo_rust"]
+  , "deps": [["./", "../clib", "foo"]]
+  }
+}

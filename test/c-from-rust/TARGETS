@@ -2,7 +2,7 @@
   { "type": ["@", "rules-rust", "rust", "binary"]
   , "name": ["main"]
   , "crate_root": ["main.rs"]
-  , "deps": [["./", "clib", "foo"]]
+  , "deps": [["./", "rust_interface", "foo_rust"]]
   }
 , "c-from-rust":
   { "type": ["@", "rules-cc", "shell/test", "script"]

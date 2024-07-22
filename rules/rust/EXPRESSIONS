@@ -1243,35 +1243,35 @@
                     }
                   , "else": {"type": "empty_map"}
                   }
-                , { "type": "if"
-                  , "cond":
-                    { "type": "=="
-                    , "$1": {"type": "var", "name": "crate_type"}
-                    , "$2": "staticlib"
-                    }
-                  , "then":
-                    { "type": "singleton_map"
-                    , "key": "link-args"
-                    , "value":
-                      { "type": "++"
-                      , "$1":
-                        [ [ { "type": "lookup"
+                , { "type": "singleton_map"
+                  , "key": "link-args"
+                  , "value":
+                    { "type": "++"
+                    , "$1":
+                      [ { "type": "if"
+                        , "cond":
+                          { "type": "=="
+                          , "$1": {"type": "var", "name": "crate_type"}
+                          , "$2": "staticlib"
+                          }
+                        , "then":
+                          [ { "type": "lookup"
                             , "key": "artifact-name"
                             , "map": {"type": "var", "name": "link result"}
                             }
                           ]
-                        , { "type": "lookup"
-                          , "key": "c-deps-link-args"
-                          , "map": {"type": "var", "name": "link result"}
-                          }
-                        , { "type": "lookup"
-                          , "key": "c-deps-run-libs-args"
-                          , "map": {"type": "var", "name": "link result"}
-                          }
-                        ]
-                      }
+                        , "else": []
+                        }
+                      , { "type": "lookup"
+                        , "key": "c-deps-link-args"
+                        , "map": {"type": "var", "name": "link result"}
+                        }
+                      , { "type": "lookup"
+                        , "key": "c-deps-run-libs-args"
+                        , "map": {"type": "var", "name": "link result"}
+                        }
+                      ]
                     }
-                  , "else": {"type": "empty_map"}
                   }
                 ]
               }
