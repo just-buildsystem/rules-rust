@@ -64,7 +64,7 @@ The `etc/repos.json` file is as follows:
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/rules-rust"
       , "branch": "master"
-      , "commit": "1a8211bda5c14ef0b2bff3af062c049d5598f02f"
+      , "commit": "ed652442176aea086104479bb31aced501df48a2"
       , "subdir": "rules"
       }
     }
@@ -236,7 +236,7 @@ Finally, amend the `repos.json` file to take into account the new `defaults`:
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/rules-rust"
       , "branch": "master"
-      , "commit": "1a8211bda5c14ef0b2bff3af062c049d5598f02f"
+      , "commit": "ed652442176aea086104479bb31aced501df48a2"
       , "subdir": "rules"
       }
     }
