@@ -652,6 +652,16 @@ def main():
     )
     parse_metadata(metadata, tree_out)
 
+    # if the provided repos.template.json does not contain a "main" let's assume it is the current project
+    # this should be useful only when transitioning a Rust-only Cargo-based project
+    if "main" not in base_config:
+        base_config["main"] = root_name
+    if "repositories" not in base_config:
+        base_config["repositories"] = {}
+
+    # let's sort to have "main" at the beginning of repos.json
+    base_config = {k: v for k, v in sorted(base_config.items())}
+
     if compute_index:
         index = sorted(repos_json.keys())
         repos_json["index"] = {
