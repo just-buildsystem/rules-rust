@@ -1,0 +1,9 @@
+{ "foo":
+  { "type": ["@", "rules-rust", "rust", "library"]
+  , "name": ["foo"]
+  , "crate_root": ["foo.rs"]
+  , "native": ["true"]
+  , "c_hdrs": ["foo.h"]
+  , "stage": ["foo"]
+  }
+}

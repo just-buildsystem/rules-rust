@@ -1,0 +1,7 @@
+{ "main":
+  { "type": ["@", "rules-rust", "rust", "binary"]
+  , "name": ["main"]
+  , "crate_root": ["main.rs"]
+  , "deps": [["foo", "foo"]]
+  }
+}

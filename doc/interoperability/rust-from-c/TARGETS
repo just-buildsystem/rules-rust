@@ -1,0 +1,8 @@
+{ "main":
+  { "type": ["@", "rules-cc", "CC", "binary"]
+  , "pure C": ["true"]
+  , "name": ["main"]
+  , "srcs": ["main.c"]
+  , "private-deps": [["foo", "foo"]]
+  }
+}

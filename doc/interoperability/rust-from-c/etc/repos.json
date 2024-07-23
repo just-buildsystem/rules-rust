@@ -1,0 +1,26 @@
+{ "main": "example"
+, "repositories":
+  { "example":
+    { "repository": {"type": "file", "path": "."}
+    , "bindings": {"rules-rust": "rules-rust", "rules-cc": "rules-cc"}
+    }
+  , "rules-rust":
+    { "repository":
+      { "type": "git"
+      , "repository": "https://github.com/just-buildsystem/rules-rust"
+      , "branch": "master"
+      , "commit": "ed652442176aea086104479bb31aced501df48a2"
+      , "subdir": "rules"
+      }
+    }
+  , "rules-cc":
+    { "repository":
+      { "type": "git"
+      , "repository": "https://github.com/just-buildsystem/rules-cc"
+      , "branch": "master"
+      , "commit": "fac7e7680e00dfc63eec41a33dff86d31571eb4b"
+      , "subdir": "rules"
+      }
+    }
+  }
+}
