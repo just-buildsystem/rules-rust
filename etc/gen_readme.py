@@ -2,8 +2,12 @@ import json
 import os
 from typing import List
 
-def lines(doc:List[str]):
-    return '\n'.join(doc)
+config_vars = {}
+
+
+def lines(doc: List[str]):
+    return "\n".join(doc)
+
 
 def gen_doc(dir: str, f):
 
@@ -11,12 +15,29 @@ def gen_doc(dir: str, f):
         rules = json.load(r)
 
     for k, v in sorted(rules.items()):
-        print(f"### `[\"{os.path.basename(dir)}\", \"{k}\"]`\n\n {lines(v['doc'])}\n", file=f)
+        global config_vars
+        config_vars.update(v.get("config_doc", {}))
+        print(
+            f"### `[\"{os.path.basename(dir)}\", \"{k}\"]`\n\n {lines(v['doc'])}\n",
+            file=f,
+        )
         print("| Field | Description |", file=f)
         print("| ----- | ----------- |", file=f)
         for field, doc in sorted(v["field_doc"].items()):
             print(f"| `\"{field}\"` | {' '.join(doc)} |", file=f)
         print(file=f)
+
+
+def print_config_vars(f):
+    print(
+        f"### Configuration variables\n",
+        file=f,
+    )
+    print("| Variable | Description |", file=f)
+    print("| -------- | ----------- |", file=f)
+    for v, doc in sorted(config_vars.items()):
+        print(f"| `\"{v}\"` | {' '.join(doc)} |", file=f)
+    print(file=f)
 
 
 def main():
@@ -57,6 +78,7 @@ your `repos.json`.
         )
         gen_doc("rules/rust", f)
         gen_doc("rules/cargo", f)
+        print_config_vars(f)
 
 
 main()

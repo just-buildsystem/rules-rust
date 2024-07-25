@@ -175,3 +175,14 @@ provided by the "defaults" for the "HOST_ARCH".
 | `"deps"` | Any other features or "[rust, library]" this feature depends on. |
 | `"name"` | The feature name. The flag `--cfg feature=<name>` is passed to the Rust compiler. |
 
+### Configuration variables
+
+| Variable | Description |
+| -------- | ----------- |
+| `"ARCH"` | Default value for both HOST_ARCH and TARGET_ARCH. It is user's responsibility to adapt the "defaults" according to the provided value. |
+| `"ENV"` | Additional environment variables (besides ones provided by the "defaults" target) to be set for each action. If the same variable is set here and in the "defaults", the former is taken. |
+| `"HOST_ARCH"` | The host CPU architecture. It is user's responsibility to adapt the "defaults" according to the provided value. |
+| `"RLIB"` | If evaluates to true, the "shared" and "native" fields are ignored and the crate type will be set to rlib. |
+| `"RUST_TEST_LAUNCHER"` | List of strings representing the launcher that is prepended to the command line for running the test binary. |
+| `"TARGET_ARCH"` | The target CPU architecture. It is user's responsibility to adapt the "defaults" according to the provided value. |
+
