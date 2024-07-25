@@ -21,7 +21,7 @@
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/rules-cc"
       , "branch": "master"
-      , "commit": "fac7e7680e00dfc63eec41a33dff86d31571eb4b"
+      , "commit": "1825c775dafd591e2a9e6bf12065e8c41727b96f"
       , "subdir": "rules"
       }
     }
@@ -30,7 +30,7 @@
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/rules-cc"
       , "branch": "master"
-      , "commit": "fac7e7680e00dfc63eec41a33dff86d31571eb4b"
+      , "commit": "1825c775dafd591e2a9e6bf12065e8c41727b96f"
       , "subdir": "tests"
       }
     , "bindings":
@@ -507,7 +507,7 @@
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/rules-cc"
       , "branch": "master"
-      , "commit": "fac7e7680e00dfc63eec41a33dff86d31571eb4b"
+      , "commit": "1825c775dafd591e2a9e6bf12065e8c41727b96f"
       , "subdir": "rules"
       }
     }
@@ -525,7 +525,7 @@
       { "type": "git"
       , "repository": "https://github.com/just-buildsystem/rules-cc"
       , "branch": "master"
-      , "commit": "fac7e7680e00dfc63eec41a33dff86d31571eb4b"
+      , "commit": "1825c775dafd591e2a9e6bf12065e8c41727b96f"
       , "subdir": "etc/imports"
       }
     }
