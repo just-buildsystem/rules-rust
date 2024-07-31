@@ -1,0 +1,8 @@
+{ "main": "bot"
+, "repositories":
+  { "bot":
+    { "repository": {"type": "file", "path": "."}
+    , "bindings": {"rules-cc": "rules-cc", "guessing_game": "guessing_game"}
+    }
+  }
+}

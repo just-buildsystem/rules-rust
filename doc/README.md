@@ -15,3 +15,11 @@ environment.
   tutorials on how to mix Rust and C. On the one hand, a Rust library
   is consumed by a C binary, on the other hand, a C library is
   consumed by a Rust binary.
+
+- [Number guessing](./number-guessing/README.md), it showcases how to
+  *transition* a Rust-only Cargo-based project to `Justbuild` using
+  the script [`just-import-cargo.py`](../bin/just-import-cargo.py).
+
+- [Number guessing bot](./number-guessing-bot/README.md) demonstrates
+  how to *import* a Cargo-based repository in another project, written
+  in C++ in this example.

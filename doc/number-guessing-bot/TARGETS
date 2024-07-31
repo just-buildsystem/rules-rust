@@ -1,0 +1,12 @@
+{ "bot":
+  { "type": ["@", "rules-cc", "CC", "binary"]
+  , "name": ["bot"]
+  , "srcs": ["bot.cpp"]
+  }
+, "bot-test":
+  { "type": ["@", "rules-cc", "shell/test", "script"]
+  , "name": ["guessing_game"]
+  , "test": ["play_game.sh"]
+  , "deps": ["bot", ["@", "guessing_game", "", "guessing_game"]]
+  }
+}
