@@ -18,7 +18,7 @@ set -euo pipefail
 readonly ROOT=$(readlink -f $(dirname $0)/..)
 
 : ${RULES_CC_REPO:=https://github.com/just-buildsystem/rules-cc}
-: ${RULES_CC_BRANCH:=master}
+: ${RULES_CC_BRANCH:=v1.4.0-alpha+20240807}
 
 just-import-git -C ${ROOT}/etc/repos.template.json \
                 --as rules-cc -b ${RULES_CC_BRANCH} ${RULES_CC_REPO} rules \
