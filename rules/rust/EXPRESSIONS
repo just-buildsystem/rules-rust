@@ -277,6 +277,24 @@
             {"type": "CALL_EXPRESSION", "name": "flatten_from_provides"}
           }
         ]
+      , [ "stage-deps-args-with-flags"
+        , { "type": "++"
+          , "$1":
+            { "type": "foreach"
+            , "var": "x"
+            , "range": {"type": "var", "name": "stage-deps-args"}
+            , "body":
+              { "type": "++"
+              , "$1":
+                { "type": "if"
+                , "cond": {"type": "var", "name": "x"}
+                , "then": [["-L", {"type": "var", "name": "x"}]]
+                }
+              , "else": []
+              }
+            }
+          }
+        ]
       , ["range", {"type": "var", "name": "defaults"}]
       , [ "transition"
         , { "type": "var"
@@ -493,6 +511,7 @@
                       , "--out-dir"
                       , {"type": "var", "name": "stage"}
                       ]
+                    , {"type": "var", "name": "stage-deps-args-with-flags"}
                     , {"type": "var", "name": "RUSTC_FLAGS"}
                     , {"type": "var", "name": "ADD_RUSTC_FLAGS"}
                     , { "type": "if"
@@ -964,7 +983,7 @@
       , [ "stage_args"
         , { "type": "++"
           , "$1":
-            [ ["-L", {"type": "var", "name": "stage"}]
+            [ [{"type": "var", "name": "stage"}]
             , { "type": "lookup"
               , "key": "stage-deps-args"
               , "map": {"type": "var", "name": "link result"}
@@ -984,8 +1003,7 @@
             , [ true
               , { "type": "++"
                 , "$1":
-                  [ {"type": "var", "name": "stage_args"}
-                  , [ "--extern"
+                  [ [ "--extern"
                     , { "type": "join"
                       , "$1":
                         [ {"type": "var", "name": "crate_name"}
@@ -1015,8 +1033,7 @@
             , [ true
               , { "type": "++"
                 , "$1":
-                  [ {"type": "var", "name": "stage_args"}
-                  , [ "--extern"
+                  [ [ "--extern"
                     , { "type": "join"
                       , "$1":
                         [ {"type": "var", "name": "crate_name"}
@@ -1176,14 +1193,17 @@
                 , { "type": "singleton_map"
                   , "key": "stage-args"
                   , "value":
-                    { "type": "++"
+                    { "type": "nub_right"
                     , "$1":
-                      [ ["-L", {"type": "var", "name": "stage"}]
-                      , { "type": "lookup"
-                        , "key": "stage-deps-args"
-                        , "map": {"type": "var", "name": "link result"}
-                        }
-                      ]
+                      { "type": "++"
+                      , "$1":
+                        [ [{"type": "var", "name": "stage"}]
+                        , { "type": "lookup"
+                          , "key": "stage-deps-args"
+                          , "map": {"type": "var", "name": "link result"}
+                          }
+                        ]
+                      }
                     }
                   }
                 , { "type": "if"
