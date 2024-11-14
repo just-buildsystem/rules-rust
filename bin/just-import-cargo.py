@@ -107,7 +107,7 @@ def split_id(id: str):
         # metadata provided by stable cargo, as of 2024-03-18
         name, version, source = id.split()
         source = source[1:-1]
-    except Exception as e:
+    except ValueError as e:
         if id.startswith("registry"):
             # "registry+https://github.com/rust-lang/crates.io-index#libc@0.2.153"
             source, name_version = id.split("#")
@@ -115,11 +115,20 @@ def split_id(id: str):
 
         elif id.startswith("path"):
             # path+file:///home/username/opt/src/commonlibrary_rust_ylong_runtime#ylong_io@1.0.0
-            source, name_version = id.split("#")
-            name, version = name_version.split("@")
+            # or
+            # path+file:///tmp/hashbrown#0.14.3
+            if id.find("@") >= 0:
+                source, name_version = id.split("#")
+                name, version = name_version.split("@")
+            else:
+                source, version = id.split("#")
+                name = source.split("/")[-1]
         else:
             print(f"while processing {id=}: {e}", file=sys.stderr)
             exit(1)
+    except Exception as e:
+        print(f"while processing {id=}: {e}", file=sys.stderr)
+        exit(1)
 
     return name, version, source
 
