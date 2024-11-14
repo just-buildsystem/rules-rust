@@ -447,7 +447,7 @@ def compute_targets(
         d = defaultdict(list)
         d["type"] = ["@", "rules", "cargo", "feature"]
         d["name"] = [f]
-        targets[f] = d
+        targets[f] = dict(d)
     with open(targets_file, "w") as f:
         print(hdumps(targets), file=f)
     return targets
