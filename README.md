@@ -160,6 +160,7 @@ provided by the "defaults" for the "HOST_ARCH".
 | `"defaults"` | The Rust toolchain to use. |
 | `"deps"` | Any other libraries this binary depends upon. |
 | `"edition"` | The edition of the compiler to use during compilation. If unset, 2015 is used. |
+| `"extra_data"` | Extra files needed while running the build script. |
 | `"name"` | The name of the crate being built. |
 | `"pkg_name"` | The name of the package the crate belongs to. It is exported to the CARGO_PKG_NAME environment variable. |
 | `"srcs"` | The source files of the binary. |
