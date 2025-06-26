@@ -65,6 +65,7 @@
     , "defaults": [{"type": "CALL_EXPRESSION", "name": "for host"}]
     , "deps": [{"type": "CALL_EXPRESSION", "name": "for host as rlib"}]
     , "srcs": [{"type": "CALL_EXPRESSION", "name": "for host"}]
+    , "extra_data": [{"type": "CALL_EXPRESSION", "name": "for host"}]
     }
   , "imports":
     { "call rustc artifact": ["./", "../rust", "call rustc artifact"]

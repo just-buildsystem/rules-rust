@@ -379,6 +379,7 @@ def compute_targets(
             d_build_script["name"] = ["build_script"]
             crate_root = os.path.relpath(t["src_path"], root_dir)
             d_build_script["crate_root"] = [crate_root]
+            d_build_script["extra_data"] = ["Cargo.toml"]
             d_build_script["arguments_config"] = config
             d_build_script["edition"] = [t["edition"]]
             d_build_script["stage"] = [rep_name]
