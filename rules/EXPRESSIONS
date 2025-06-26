@@ -123,7 +123,7 @@
   }
 , "get_unique_artifact":
   { "doc":
-    [ "Retrive the unique artifact. Asserts double checks that the"
+    [ "Retrieve the unique artifact. Asserts double-check that the"
     , "\"field_content\" evaluates to a single artifact."
     ]
   , "vars": ["field_name", "field_content", "transition"]
