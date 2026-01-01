@@ -57,9 +57,6 @@ Recompute all target files, even if cached.
 **`-r`**, **`--recompute-repos`**  
 Recompute all repositories, even if cached.
 
-**`-s`**, **`--recompute-sources`**  
-Recompute all source descriptions, even if cached.
-
 **`-I`**, **`--compute-index`**  
 Add an index repository.
 

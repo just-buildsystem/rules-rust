@@ -223,7 +223,7 @@ File: etc/deps-rust/TARGETS.rand_chacha-0.3.1
   { "type": ["@", "rules", "rust", "library"]
   , "name": ["rand_chacha"]
   , "crate_root": ["src/lib.rs"]
-  , "srcs": ["src/chacha.rs", "src/guts.rs", "src/lib.rs"]
+  , "srcs": [["TREE", null, "."]]
   , "edition": ["2018"]
   , "arguments_config":
     ["ARCH", "HOST_ARCH", "TARGET_ARCH", "ENV", "TOOLCHAIN_CONFIG"]
@@ -270,7 +270,7 @@ File: TARGETS
   { "type": ["@", "rules", "rust", "binary"]
   , "name": ["guessing_game"]
   , "crate_root": ["src/main.rs"]
-  , "srcs": ["src/main.rs"]
+  , "srcs": [["TREE", null, "."]]
   , "edition": ["2021"]
   , "arguments_config":
     ["ARCH", "HOST_ARCH", "TARGET_ARCH", "ENV", "TOOLCHAIN_CONFIG"]
