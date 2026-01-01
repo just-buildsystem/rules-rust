@@ -616,22 +616,26 @@
           ]
         ]
       , [ "inputs"
-        , { "type": "map_union"
-          , "$1":
-            [ {"type": "var", "name": "crate_root"}
-            , {"type": "var", "name": "srcs"}
-            , { "type": "case"
-              , "case":
-                { "bin": {"type": "var", "name": "link-deps"}
-                , "cdylib": {"type": "var", "name": "link-deps"}
-                , "dylib": {"type": "var", "name": "link-deps"}
-                , "proc-macro": {"type": "var", "name": "link-deps"}
-                , "rlib": {"type": "var", "name": "compile-deps"}
-                , "staticlib": {"type": "var", "name": "link-deps"}
+        , { "type": "singleton_map"
+          , "key": "."
+          , "value":
+            { "type": "DISJOINT_TREE_OVERLAY"
+            , "$1":
+              [ {"type": "var", "name": "crate_root"}
+              , {"type": "var", "name": "srcs"}
+              , { "type": "case"
+                , "case":
+                  { "bin": {"type": "var", "name": "link-deps"}
+                  , "cdylib": {"type": "var", "name": "link-deps"}
+                  , "dylib": {"type": "var", "name": "link-deps"}
+                  , "proc-macro": {"type": "var", "name": "link-deps"}
+                  , "rlib": {"type": "var", "name": "compile-deps"}
+                  , "staticlib": {"type": "var", "name": "link-deps"}
+                  }
+                , "expr": {"type": "var", "name": "crate_type"}
                 }
-              , "expr": {"type": "var", "name": "crate_type"}
-              }
-            ]
+              ]
+            }
           }
         ]
       , [ "outs"

@@ -90,7 +90,6 @@ repos_json: JSON = dict()
 
 recompute_targets = False
 recompute_repos = False
-recompute_sources = False
 compute_index = False
 root_id = None
 root_name = None
@@ -280,32 +279,6 @@ def local_repo(
     repos_json.update(repos)
     print("done", file=sys.stderr)
 
-def compute_srcs(root_dir: str, name: str, version: str) -> List[Any]:
-    entry, exists = cache_entry(name, version)
-    if not exists:
-        os.makedirs(entry)
-    srcs_file = os.path.join(entry, "srcs.json")
-    global recompute_sources
-    if not recompute_sources and os.path.exists(srcs_file):
-        with open(srcs_file) as f:
-            return json.load(f)
-
-    srcs: List[Any] = list()
-
-    for f in glob.glob(f"{root_dir}/**/*.rs", recursive=True):
-        f = os.path.relpath(f, root_dir)
-        if (
-            not f.startswith("example")
-            and not f.startswith("test")
-            and not f.startswith("bench")
-        ):
-            srcs.append(f)
-
-    with open(srcs_file, "w") as f:
-        print(json.dumps(srcs), file=f)
-    return sorted(srcs)
-
-
 def to_underscore(x: str):
     return x.replace("-", "_")
 
@@ -398,7 +371,7 @@ def compute_targets(
         d["name"] = [to_underscore(t["name"])]
         d["crate_root"] = [crate_root]
         if not is_dev_target:
-            d["srcs"] = compute_srcs(root_dir, name, version)
+            d["srcs"] = [["TREE", None, "."]]
         d["edition"] = [t["edition"]]
         d["arguments_config"] = config
         d["deps"], d["cargo_features"] = active_deps_from_tree(
@@ -625,7 +598,6 @@ def main():
     )
     parser.add_argument("-t", "--recompute-targets", action="store_true")
     parser.add_argument("-r", "--recompute-repos", action="store_true")
-    parser.add_argument("-s", "--recompute-sources", action="store_true")
     parser.add_argument("-I", "--compute-index", action="store_true")
     parser.add_argument(
         "-g",
@@ -649,10 +621,9 @@ def main():
         CACHE_ROOT = args.cache_root
 
     tree_out: JSON = parse_cargo_tree(root_dir)
-    global recompute_targets, recompute_repos, recompute_sources, compute_index, root_name, root_version
+    global recompute_targets, recompute_repos, compute_index, root_name, root_version
     recompute_repos = args.recompute_repos
     recompute_targets = args.recompute_targets
-    recompute_sources = args.recompute_sources
     compute_index = args.compute_index
     pprint(args, stream=sys.stderr)
 
