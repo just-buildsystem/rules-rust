@@ -37,7 +37,7 @@
       { "test-just": "rules-test/just"
       , "test-rules": "test-rules"
       , "test-libs": "rules-test/test-libs"
-      , "rules": "rules-test/rules"
+      , "rules": "rules-cc"
       }
     }
   , "rules-test/gtest":
@@ -500,15 +500,6 @@
       }
     , "target_root": "rules-test/imports"
     , "target_file_name": "libz.TARGETS"
-    }
-  , "rules-test/rules":
-    { "repository":
-      { "type": "git"
-      , "repository": "https://github.com/just-buildsystem/rules-cc"
-      , "branch": "v1.6.4-alpha+20260102"
-      , "commit": "194f917e138ef9b30339274bd98aadc05b7d15a9"
-      , "subdir": "rules"
-      }
     }
   , "rules-test/test-libs":
     { "repository": "rules-test/imports"

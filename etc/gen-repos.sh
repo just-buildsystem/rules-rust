@@ -26,4 +26,5 @@ just-import-git -C ${ROOT}/etc/repos.template.json \
     just-import-git -C - \
                     --map test-rules test-rules \
                     --as rules-test -b ${RULES_CC_BRANCH} ${RULES_CC_REPO} tests \
+    | just-deduplicate-repos \
     | ${ROOT}/bin/hdump.py > ${ROOT}/etc/repos.json
